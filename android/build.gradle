@@ -48,6 +48,7 @@ repositories {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'com.google.android.gms:play-services-base:18.1.0'
     implementation 'com.google.android.gms:play-services-home:16.0.0'
     implementation project(':capacitor-android')
     // implementation "androidx.appcompat:appcompat:$androidxAppCompatVersion"
@@ -55,5 +56,7 @@ dependencies {
     // androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
     // androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation 'androidx.lifecycle:lifecycle-process:2.3.1'
+    implementation 'androidx.lifecycle:lifecycle-process:2.4.0'
+    implementation 'javax.inject:javax.inject:1'
+    implementation 'androidx.appcompat:appcompat:1.5.1'
 }
