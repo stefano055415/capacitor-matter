@@ -1,5 +1,7 @@
 # @falconeta/capacitor-plugin-matter
 
+# WORK IN PROGRESS!
+
 plugin that handle the Matter Application protocol
 
 ## Install
