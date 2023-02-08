@@ -6,7 +6,7 @@ ext {
 }
 
 buildscript {
-    ext.kotlin_version = '1.7.10'
+    ext.kotlin_version = '1.6.10'
     repositories {
         google()
         mavenCentral()
@@ -37,6 +37,21 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    compileOptions {
+      sourceCompatibility JavaVersion.VERSION_1_8
+      targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+      jvmTarget = '1.8'
+    }
+    buildFeatures {
+      dataBinding true
+    }
+    sourceSets {
+      main {
+        jniLibs.srcDirs = ['third_party/connectedhomeip/libs/jniLibs']
+      }
+    }
     lintOptions {
         abortOnError false
     }
@@ -49,9 +64,13 @@ repositories {
 
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    // Native libs
+    implementation fileTree(dir: "third_party/connectedhomeip/libs", include: ["*.jar", "*.so"])
+
     implementation 'com.google.android.gms:play-services-base:18.1.0'
     implementation 'com.google.android.gms:play-services-home:16.0.0'
+
+
     implementation project(':capacitor-android')
     // implementation "androidx.appcompat:appcompat:$androidxAppCompatVersion"
     // testImplementation "junit:junit:$junitVersion"

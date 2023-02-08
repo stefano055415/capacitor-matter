@@ -1,6 +1,6 @@
 {
   "name": "@falconeta/capacitor-plugin-matter",
-  "version": "0.0.7",
+  "version": "0.0.16",
   "description": "plugin that handle the Matter Application protocol",
   "main": "dist/plugin.cjs.js",
   "module": "dist/esm/index.js",
@@ -9,6 +9,7 @@
   "files": [
     "android/src/main/",
     "android/build.gradle",
+    "post-install.js",
     "dist/",
     "ios/Plugin/",
     "FalconetaCapacitorPluginMatter.podspec"
@@ -28,6 +29,7 @@
     "native"
   ],
   "scripts": {
+    "postinstall": "node post-install.js",
     "verify": "npm run verify:ios && npm run verify:android && npm run verify:web",
     "verify:ios": "cd ios && pod install && xcodebuild -workspace Plugin.xcworkspace -scheme Plugin -destination generic/platform=iOS && cd ..",
     "verify:android": "cd android && ./gradlew clean build test && cd ..",

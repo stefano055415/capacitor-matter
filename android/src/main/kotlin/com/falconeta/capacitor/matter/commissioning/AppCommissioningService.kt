@@ -20,6 +20,7 @@ import android.app.Service
 import android.content.Intent
 import android.os.IBinder
 import android.util.Log
+import com.falconeta.capacitor.matter.chip.ChipClient
 import com.google.android.gms.home.matter.commissioning.CommissioningCompleteMetadata
 import com.google.android.gms.home.matter.commissioning.CommissioningRequestMetadata
 import com.google.android.gms.home.matter.commissioning.CommissioningService
@@ -27,11 +28,8 @@ import com.google.android.gms.home.matter.commissioning.CommissioningService
 //import com.google.homesampleapp.R
 //import com.google.homesampleapp.chip.ChipClient
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.*
 import javax.inject.Inject
-//import kotlinx.coroutines.CoroutineScope
-//import kotlinx.coroutines.dispatchers
-//import kotlinx.coroutines.Job
-//import kotlinx.coroutines.launch
 
 /**
  * The CommissioningService that's responsible for commissioning the device on the app's custom
@@ -44,12 +42,12 @@ class AppCommissioningService : Service(), CommissioningService.Callback {
 
 //  @Inject internal lateinit var devicesRepository: DevicesRepository
 //  @Inject internal lateinit var devicesStateRepository: DevicesStateRepository
-//  @Inject internal lateinit var chipClient: ChipClient
+  @Inject internal lateinit var chipClient: ChipClient
 
   private final var TAG: String = "MATTER COMMISSIONING SERVICE"
 
-//  private val serviceJob = Job()
-//  private val serviceScope = CoroutineScope(Dispatchers.Main + serviceJob)
+  private val serviceJob = Job()
+  private val serviceScope = CoroutineScope(Dispatchers.Main + serviceJob)
 
   private lateinit var commissioningServiceDelegate: CommissioningService
 
@@ -93,41 +91,41 @@ class AppCommissioningService : Service(), CommissioningService.Callback {
     // CODELAB: onCommissioningRequested()
     // Perform commissioning on custom fabric for the sample app.
 
-    commissioningServiceDelegate
-      .sendCommissioningComplete(
-        CommissioningCompleteMetadata.builder().build())
-      .addOnSuccessListener {
-        Log.i(TAG,
-          "Commissioning: OnSuccess for commissioningServiceDelegate.sendCommissioningComplete()")
-      }
-      .addOnFailureListener { ex ->
-        Log.e(TAG,"Commissioning: Failed to send commissioning complete.", ex)
-      }
+//    commissioningServiceDelegate
+//      .sendCommissioningComplete(
+//        CommissioningCompleteMetadata.builder().build())
+//      .addOnSuccessListener {
+//        Log.i(TAG,
+//          "Commissioning: OnSuccess for commissioningServiceDelegate.sendCommissioningComplete()")
+//      }
+//      .addOnFailureListener { ex ->
+//        Log.e(TAG,"Commissioning: Failed to send commissioning complete.", ex)
+//      }
 
-//    serviceScope.launch {
-//      val deviceId = devicesRepository.incrementAndReturnLastDeviceId()
-//      Log.i(TAG,
-//          "Commissioning: App fabric -> ChipClient.establishPaseConnection(): deviceId [${deviceId}]")
-//      chipClient.awaitEstablishPaseConnection(
-//          deviceId,
-//          metadata.networkLocation.ipAddress.hostAddress!!,
-//          metadata.networkLocation.port,
-//          metadata.passcode)
-//      Log.i(TAG,"Commissioning: App fabric -> ChipClient.commissionDevice(): deviceId [${deviceId}]")
-//      chipClient.awaitCommissionDevice(deviceId, null)
-//
-//      Log.i(TAG,"Commissioning: Calling commissioningServiceDelegate.sendCommissioningComplete()")
-//      commissioningServiceDelegate
-//          .sendCommissioningComplete(
-//              CommissioningCompleteMetadata.builder().setToken(deviceId.toString()).build())
-//          .addOnSuccessListener {
-//            Log.i(TAG,
-//                "Commissioning: OnSuccess for commissioningServiceDelegate.sendCommissioningComplete()")
-//          }
-//          .addOnFailureListener { ex ->
-//            Log.e("Commissioning: Failed to send commissioning complete.", ex)
-//          }
-//    }
-    // CODELAB SECTION END
+
+    serviceScope.launch {
+      val deviceId: Long = 1 // devicesRepository.incrementAndReturnLastDeviceId()
+      Log.i(TAG,
+          "Commissioning: App fabric -> ChipClient.establishPaseConnection(): deviceId [${deviceId}]")
+      chipClient.awaitEstablishPaseConnection(
+          deviceId,
+          metadata.networkLocation.ipAddress.hostAddress!!,
+          metadata.networkLocation.port,
+          metadata.passcode)
+      Log.i(TAG,"Commissioning: App fabric -> ChipClient.commissionDevice(): deviceId [${deviceId}]")
+      chipClient.awaitCommissionDevice(deviceId, null)
+
+      Log.i(TAG,"Commissioning: Calling commissioningServiceDelegate.sendCommissioningComplete()")
+      commissioningServiceDelegate
+          .sendCommissioningComplete(
+              CommissioningCompleteMetadata.builder().setToken(deviceId.toString()).build())
+          .addOnSuccessListener {
+            Log.i(TAG,
+                "Commissioning: OnSuccess for commissioningServiceDelegate.sendCommissioningComplete()")
+          }
+          .addOnFailureListener { ex ->
+            Log.e(TAG, "Commissioning: Failed to send commissioning complete $ex")
+          }
+    }
   }
 }
