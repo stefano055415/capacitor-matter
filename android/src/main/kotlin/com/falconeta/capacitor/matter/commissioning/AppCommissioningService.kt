@@ -21,6 +21,8 @@ import android.content.Intent
 import android.os.IBinder
 import android.util.Log
 import com.falconeta.capacitor.matter.chip.ChipClient
+import com.falconeta.capacitor.matter.chip.ClustersHelper
+import com.falconeta.capacitor.matter.preference.Preference
 import com.google.android.gms.home.matter.commissioning.CommissioningCompleteMetadata
 import com.google.android.gms.home.matter.commissioning.CommissioningRequestMetadata
 import com.google.android.gms.home.matter.commissioning.CommissioningService
@@ -30,6 +32,7 @@ import com.google.android.gms.home.matter.commissioning.CommissioningService
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
 import javax.inject.Inject
+import kotlin.coroutines.suspendCoroutine
 
 /**
  * The CommissioningService that's responsible for commissioning the device on the app's custom
@@ -42,9 +45,13 @@ class AppCommissioningService : Service(), CommissioningService.Callback {
 
 //  @Inject internal lateinit var devicesRepository: DevicesRepository
 //  @Inject internal lateinit var devicesStateRepository: DevicesStateRepository
-  @Inject internal lateinit var chipClient: ChipClient
+  private lateinit var chipClient: ChipClient
+  private lateinit var preference: Preference
 
   private final var TAG: String = "MATTER COMMISSIONING SERVICE"
+
+
+  private var testOn = false
 
   private val serviceJob = Job()
   private val serviceScope = CoroutineScope(Dispatchers.Main + serviceJob)
@@ -57,6 +64,9 @@ class AppCommissioningService : Service(), CommissioningService.Callback {
     // So do it here as well.
     Log.i(TAG,"onCreate()")
     commissioningServiceDelegate = CommissioningService.Builder(this).setCallback(this).build()
+
+    chipClient = ChipClient(this);
+    preference = Preference(this);
   }
 
   override fun onBind(intent: Intent): IBinder {
@@ -72,7 +82,8 @@ class AppCommissioningService : Service(), CommissioningService.Callback {
   override fun onDestroy() {
     super.onDestroy()
     Log.i(TAG,"onDestroy()")
-//    serviceJob.cancel()
+    preference.removeDeviceIdForCommissioning()
+    serviceJob.cancel()
   }
 
   override fun onCommissioningRequested(metadata: CommissioningRequestMetadata) {
@@ -104,7 +115,7 @@ class AppCommissioningService : Service(), CommissioningService.Callback {
 
 
     serviceScope.launch {
-      val deviceId: Long = 1 // devicesRepository.incrementAndReturnLastDeviceId()
+      val deviceId = preference.getDeviceIdForCommissioning()
       Log.i(TAG,
           "Commissioning: App fabric -> ChipClient.establishPaseConnection(): deviceId [${deviceId}]")
       chipClient.awaitEstablishPaseConnection(
@@ -114,7 +125,6 @@ class AppCommissioningService : Service(), CommissioningService.Callback {
           metadata.passcode)
       Log.i(TAG,"Commissioning: App fabric -> ChipClient.commissionDevice(): deviceId [${deviceId}]")
       chipClient.awaitCommissionDevice(deviceId, null)
-
       Log.i(TAG,"Commissioning: Calling commissioningServiceDelegate.sendCommissioningComplete()")
       commissioningServiceDelegate
           .sendCommissioningComplete(

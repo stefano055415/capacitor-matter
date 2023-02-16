@@ -13,6 +13,7 @@ import com.getcapacitor.PluginCall
 import com.getcapacitor.JSObject
 import com.getcapacitor.Plugin
 import com.google.android.gms.home.matter.commissioning.CommissioningResult
+import org.xml.sax.ErrorHandler
 
 @CapacitorPlugin(name = "Matter")
 class MatterPlugin : Plugin() {
@@ -38,7 +39,7 @@ class MatterPlugin : Plugin() {
       }
     }
 
-    implementation = MatterInstance(commissioningLauncher);
+    implementation = MatterInstance(context, commissioningLauncher);
   }
 
   fun commissionDeviceSucceeded(activityResult: ActivityResult) {
@@ -102,25 +103,74 @@ class MatterPlugin : Plugin() {
 
 //    data.put("deviceId",deviceId.toString())
     data.put("deviceType", result.commissionedDeviceDescriptor.deviceType)
-    data.put("hashCode", result.commissionedDeviceDescriptor.hashCode())
-    data.put("vendorId",  result.commissionedDeviceDescriptor.vendorId)
-    data.put("productId", result.commissionedDeviceDescriptor.productId)
+    // data.put("hashCode", result.commissionedDeviceDescriptor.hashCode())
+    // data.put("vendorId",  result.commissionedDeviceDescriptor.vendorId)
+    // data.put("productId", result.commissionedDeviceDescriptor.productId)
     val ret = JSObject()
     ret.put("value", data)
 
-    if(_call != null){
+    if (_call != null) {
       _call!!.resolve(ret)
       _call = null;
     }
   }
 
   @PluginMethod
-    fun echo(call: PluginCall) {
-
-//        val value = call.getString("value")
-        val ret = JSObject()
-        ret.put("value", implementation.echo(context))
-        _call = call;
-//        call.resolve(ret)
+  fun configure(call: PluginCall) {
+    val deviceControllerKey = call.getString("deviceControllerKey")
+    val caRootCert = call.getString("caRootCert")
+    val fabricStringId = call.getString("fabricId")
+    val vendorId = call.getInt("vendorId")
+    if (deviceControllerKey == null || caRootCert == null || fabricStringId == null || vendorId == null) {
+      call.reject("params must be exist!")
+      return;
     }
+
+    try {
+      val fabricId = fabricStringId.toLong()
+      implementation.configure(deviceControllerKey, caRootCert, fabricId, vendorId)
+      call.resolve()
+    } catch (error: NumberFormatException) {
+      call.reject("fabricId must be a number and not major of 9223372036854775807" )
+    }
+
+  }
+
+  @PluginMethod
+  fun startCommissioning(call: PluginCall) {
+    val deviceStringId = call.getString("deviceId")
+    if (deviceStringId == null) {
+      call.reject("deviceId must be exist!")
+      return;
+    }
+
+    try {
+      val deviceId = deviceStringId.toLong()
+      implementation.startCommissioning(deviceId)
+      _call = call;
+    } catch (error: NumberFormatException) {
+      call.reject("deviceId must be a number and not major of 9223372036854775807" )
+    }
+
+  }
+
+  @PluginMethod
+  fun commandOnOff(call: PluginCall) {
+    val deviceStringId = call.getString("deviceId")
+    val value = call.getBoolean("value")
+    if (deviceStringId == null || value == null) {
+      call.reject("deviceId and value must be exist!")
+      return;
+    }
+
+    try {
+      val deviceId = deviceStringId.toLong()
+      implementation.commandOnOff(deviceId, value)
+      call.resolve()
+//      _call = call;
+    } catch (error: NumberFormatException) {
+      call.reject("deviceId must be a number and not major of 9223372036854775807" )
+    }
+
+  }
 }
