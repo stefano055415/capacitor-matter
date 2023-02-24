@@ -121,7 +121,12 @@ class MatterPlugin : Plugin() {
     val caRootCert = call.getString("caRootCert")
     val fabricStringId = call.getString("fabricId")
     val vendorId = call.getInt("vendorId")
-    if (deviceControllerKey == null || caRootCert == null || fabricStringId == null || vendorId == null) {
+//    if (deviceControllerKey == null || caRootCert == null || fabricStringId == null || vendorId == null) {
+//      call.reject("params must be exist!")
+//      return;
+//    }
+
+    if (fabricStringId == null || vendorId == null) {
       call.reject("params must be exist!")
       return;
     }
@@ -131,10 +136,27 @@ class MatterPlugin : Plugin() {
       implementation.configure(deviceControllerKey, caRootCert, fabricId, vendorId)
       call.resolve()
     } catch (error: NumberFormatException) {
-      call.reject("fabricId must be a number and not major of 9223372036854775807" )
+      call.reject("fabricId must be a number and not major of 9223372036854775807")
     }
 
   }
+
+  @PluginMethod
+  fun clear(call: PluginCall) {
+    implementation.clear()
+    call.resolve()
+  }
+
+  @PluginMethod
+  fun getCerts(call: PluginCall) {
+    var (deviceControllerKey, caRootCert) = implementation.getCerts()
+    val data = JSObject()
+    data.put("deviceControllerKey", deviceControllerKey)
+    data.put("caRootCert", caRootCert)
+
+    call.resolve(data)
+  }
+
 
   @PluginMethod
   fun startCommissioning(call: PluginCall) {
@@ -149,7 +171,7 @@ class MatterPlugin : Plugin() {
       implementation.startCommissioning(deviceId)
       _call = call;
     } catch (error: NumberFormatException) {
-      call.reject("deviceId must be a number and not major of 9223372036854775807" )
+      call.reject("deviceId must be a number and not major of 9223372036854775807")
     }
 
   }
@@ -169,7 +191,30 @@ class MatterPlugin : Plugin() {
       call.resolve()
 //      _call = call;
     } catch (error: NumberFormatException) {
-      call.reject("deviceId must be a number and not major of 9223372036854775807" )
+      call.reject("deviceId must be a number and not major of 9223372036854775807")
+    }
+
+  }
+
+  @PluginMethod
+  fun readAttribute(call: PluginCall) {
+    val deviceStringId = call.getString("deviceId")
+    val endpointId = call.getInt("endpointId")
+    val clusterId = call.getInt("clusterId")
+    val attributeId = call.getInt("attributeId")
+
+    if (deviceStringId == null || endpointId == null || clusterId == null || attributeId == null) {
+      call.reject("params must be exist!")
+      return;
+    }
+
+    try {
+      val deviceId = deviceStringId.toLong()
+      implementation.readAttribute(deviceId, endpointId, clusterId, attributeId)
+      call.resolve()
+//      _call = call;
+    } catch (error: NumberFormatException) {
+      call.reject("deviceId must be a number and not major of 9223372036854775807")
     }
 
   }

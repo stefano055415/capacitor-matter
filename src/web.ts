@@ -1,11 +1,28 @@
 import { WebPlugin } from '@capacitor/core';
 
-import type { MatterPlugin } from './definitions';
+import type {
+  AttributePath,
+  MatterPlugin,
+  SubscriberOptions,
+} from './definitions';
 
 export class MatterWeb extends WebPlugin implements MatterPlugin {
+  getCerts(): Promise<{ deviceControllerKey: string; caRootCert: string }> {
+    throw new Error('Method not implemented.');
+  }
+  readAttribute<T>(options: AttributePath): Promise<{ data: T }> {
+    console.log(options);
+    throw new Error('Method not implemented.');
+  }
+
+  subscribeAttribute(options: SubscriberOptions): Promise<void> {
+    console.log(options);
+    throw new Error('Method not implemented.');
+  }
+
   configure(options: {
-    deviceControllerKey: string;
-    caRootCert: string;
+    deviceControllerKey?: string;
+    caRootCer?: string;
     fabricId: string;
     vendorId: number;
   }): Promise<void> {
@@ -21,7 +38,11 @@ export class MatterWeb extends WebPlugin implements MatterPlugin {
     console.log(options);
     throw new Error('Method not implemented.');
   }
-  commandOnOff(options: { value: boolean; deviceId: string; endpointId: number; }): Promise<void> {
+  commandOnOff(options: {
+    value: boolean;
+    deviceId: string;
+    endpointId: number;
+  }): Promise<void> {
     console.log(options);
     throw new Error('Method not implemented.');
   }

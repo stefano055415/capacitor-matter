@@ -65,17 +65,31 @@ class Preference(context: Context) {
     return Pair(vendorId, fabricId)
   }
 
+  public fun getCerts(): Pair<String, String> {
+    val fabricId = (get("fabricId") ?: "1").toLong()
+    var caRootKey = "AndroidCARootCert" + java.lang.Long.toHexString(fabricId);
+
+    val caRoot = (get(caRootKey) ?: "")
+    val deviceControllerKey = (get("AndroidDeviceControllerKey") ?: "")
+
+    return Pair(deviceControllerKey, caRoot)
+  }
+
   public fun setConfiguration(
-    deviceControllerKey: String,
-    caRootCert: String,
+    deviceControllerKey: String?,
+    caRootCert: String?,
     fabricId: kotlin.Long,
     vendorId: Int
   ) {
+    if (deviceControllerKey != null) {
+      set("AndroidDeviceControllerKey", deviceControllerKey);
+    }
 
-    var caRootKey = "AndroidCARootCert" + java.lang.Long.toHexString(fabricId)
+    if (caRootCert != null) {
+      var caRootKey = "AndroidCARootCert" + java.lang.Long.toHexString(fabricId)
+      set(caRootKey, caRootCert);
+    }
 
-    set("AndroidCARootCert", caRootCert);
-    set("AndroidDeviceControllerKey", deviceControllerKey);
     set("fabricId", fabricId.toString());
     set("vendorId", vendorId.toString());
   }

@@ -5,6 +5,8 @@ import android.content.Context
 import android.util.Log
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.IntentSenderRequest
+import chip.devicecontroller.model.ChipAttributePath
+import chip.devicecontroller.model.ChipPathId
 import com.falconeta.capacitor.matter.chip.ChipClient
 import com.falconeta.capacitor.matter.chip.ClustersHelper
 import com.falconeta.capacitor.matter.commissioning.AppCommissioningService
@@ -25,6 +27,7 @@ class MatterInstance(
 
   private var preference: Preference = Preference(context);
   private lateinit var clustersHelper: ClustersHelper;
+  private lateinit var chipClient: ChipClient;
 
   private val matterInstanceJob = Job()
   private val matterInstanceScope = CoroutineScope(Dispatchers.Main + matterInstanceJob)
@@ -32,8 +35,8 @@ class MatterInstance(
   private var configured = false;
 
   fun configure(
-    deviceControllerKey: String,
-    caRootCert: String,
+    deviceControllerKey: String?,
+    caRootCert: String?,
     fabricId: Long,
     vendorId: Int
   ) {
@@ -43,9 +46,17 @@ class MatterInstance(
     )
     preference.setConfiguration(deviceControllerKey, caRootCert, fabricId, vendorId);
     clustersHelper = ClustersHelper(context);
+    chipClient = ChipClient(context);
     configured = true;
   }
 
+  fun clear() {
+    preference.clear()
+  }
+
+  fun getCerts(): Pair<String, String> {
+    return preference.getCerts()
+  }
 
   fun startCommissioning(deviceId: Long) {
     preference.setDeviceIdForCommissioning(deviceId);
@@ -58,9 +69,36 @@ class MatterInstance(
     }
   }
 
+  fun readAttribute(deviceId: Long, endpointId: Int, clusterId: Int, attributeId: Int) {
+    if (!configured) {
+      throw java.lang.Error("plugin must be configured first...");
+    }
+    this.matterInstanceScope.launch {
+      val chipEndpointId = getChipPathIdForText(endpointId.toString())
+      val chipClusterId = getChipPathIdForText(clusterId.toString())
+      val chipAttributeId = getChipPathIdForText(attributeId.toString())
+//      val eventId = getChipPathIdForText(eventIdEd.text.toString())
+      val attributePath =
+        ChipAttributePath.newInstance(chipEndpointId, chipClusterId, chipAttributeId)
+
+      chipClient.readAttribute(deviceId, attributePath);
+
+//      deviceController.readPath(reportCallback,
+//        ChipClient.getConnectedDevicePointer(requireContext(),
+//          addressUpdateFragment.deviceId),
+//        listOf(attributePath),
+//        null,
+//        isFabricFiltered)
+    }
+  }
+
+  private fun getChipPathIdForText(text: String): ChipPathId {
+    return if (text.isEmpty()) ChipPathId.forWildcard() else ChipPathId.forId(text.toLong())
+  }
+
   private fun commissionDevice() {
 
-    if(!configured){
+    if (!configured) {
       throw java.lang.Error("plugin must be configured first...");
     }
 

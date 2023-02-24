@@ -2,8 +2,12 @@ package com.falconeta.capacitor.matter.chip
 
 import android.content.Context
 import android.util.Log
+import androidx.core.content.ContentProviderCompat.requireContext
 import chip.devicecontroller.*
 import chip.devicecontroller.GetConnectedDeviceCallbackJni.GetConnectedDeviceCallback
+import chip.devicecontroller.model.ChipAttributePath
+import chip.devicecontroller.model.ChipEventPath
+import chip.devicecontroller.model.NodeState
 import chip.platform.AndroidBleManager
 import chip.platform.AndroidChipPlatform
 import chip.platform.ChipMdnsCallbackImpl
@@ -32,6 +36,58 @@ class ChipClient(context: Context) {
     fabricId = fid;
   }
 
+  private val reportCallback = object : ReportCallback {
+    override fun onError(attributePath: ChipAttributePath?, eventPath: ChipEventPath?, ex: Exception) {
+      if (attributePath != null)
+      {
+        Log.e(TAG, "Report error for $attributePath: $ex")
+      }
+      if (eventPath != null)
+      {
+        Log.e(TAG, "Report error for $eventPath: $ex")
+      }
+    }
+
+    override fun onReport(nodeState: NodeState) {
+      Log.i(TAG, "Received wildcard report")
+      val debugString = nodeStateToDebugString(nodeState)
+      Log.i(TAG, debugString)
+//      requireActivity().runOnUiThread { binding.outputTv.text = debugString }
+    }
+
+    override fun onDone() {
+      Log.i(TAG, "wildcard report Done")
+    }
+  }
+
+  private fun nodeStateToDebugString(nodeState: NodeState): String {
+    val stringBuilder = StringBuilder()
+    nodeState.endpointStates.forEach { (endpointId, endpointState) ->
+      stringBuilder.append("Endpoint $endpointId: {\n")
+      endpointState.clusterStates.forEach { (clusterId, clusterState) ->
+        stringBuilder.append("\t${ChipIdLookup.clusterIdToName(clusterId)}Cluster: {\n")
+        clusterState.attributeStates.forEach { (attributeId, attributeState) ->
+          val attributeName = ChipIdLookup.attributeIdToName(clusterId, attributeId)
+          stringBuilder.append("\t\t$attributeName: ${attributeState.value}\n")
+        }
+        clusterState.eventStates.forEach { (eventId, events) ->
+          for (event in events)
+          {
+            stringBuilder.append("\t\teventNumber: ${event.eventNumber}\n")
+            stringBuilder.append("\t\tpriorityLevel: ${event.priorityLevel}\n")
+            stringBuilder.append("\t\tsystemTimeStamp: ${event.systemTimeStamp}\n")
+
+            val eventName = ChipIdLookup.eventIdToName(clusterId, eventId)
+            stringBuilder.append("\t\t$eventName: ${event.value}\n")
+          }
+        }
+        stringBuilder.append("\t}\n")
+      }
+      stringBuilder.append("}\n")
+    }
+    return stringBuilder.toString()
+  }
+
   private val controllerParams: ControllerParams = ControllerParams.newBuilder()
     .setUdpListenPort(0)
 //    .setRootCertificate("MIIBljCCATygAwIBAgIBADAKBggqhkjOPQQDAjAiMSAwHgYKKwYBBAGConwBBAwQMDAwMDAwMDAwMDAwMDAwMDAeFw0yMTA2MTAwMDAwMDBaFw0zMTA2MDgwMDAwMDBaMCIxIDAeBgorBgEEAYKifAEEDBAwMDAwMDAwMDAwMDAwMDAwMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEpcaFHeRGcaHarIfWxgZPDOO/oPX6H2VngD/P1XJqOFI1Kmjh+HrbnNTb92cpZjfs6VEoMnimy+eFMgDMAsemQqNjMGEwDwYDVR0TAQH/BAUwAwEB/zAOBgNVHQ8BAf8EBAMCAQYwHQYDVR0OBBYEFIwppQEIGNW95r7dA6kxhhzNQfvaMB8GA1UdIwQYMBaAFIwppQEIGNW95r7dA6kxhhzNQfvaMAoGCCqGSM49BAMCA0gAMEUCIQDDF1F9sVuug55gceG3To7G1WuBUMHi40Cx2uXrYsHkQQIgX+Re3SPGFDH8j07PqdCqaKCeRUhiuuMJJ8ttblhwT68=".toByteArray())
@@ -53,6 +109,16 @@ class ChipClient(context: Context) {
       DiagnosticDataProviderImpl(context))
     ChipDeviceController(
       controllerParams)
+  }
+
+  suspend fun readAttribute(deviceId: Long, attributePath: ChipAttributePath) {
+//    return suspendCoroutine { continuation ->
+      val pointerId = getConnectedDevicePointer(deviceId)
+      chipDeviceController.readAttributePath(reportCallback,
+        pointerId,
+        listOf(attributePath))
+//    }
+
   }
 
   /**
