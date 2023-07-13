@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.falconeta.capacitor.matter">
+    >
   <application>
     <service
       android:name="com.falconeta.capacitor.matter.commissioning.AppCommissioningService"
