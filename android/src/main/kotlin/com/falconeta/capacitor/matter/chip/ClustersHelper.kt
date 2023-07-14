@@ -276,8 +276,8 @@ class ClustersHelper(context: Context) {
     return suspendCoroutine { continuation ->
       getBasicClusterForDevice(connectedDevicePtr, endpoint)
         .readVendorIDAttribute(
-          object : ChipClusters.ApplicationBasicCluster.VendorIDAttributeCallback {
-            override fun onSuccess(value: Int?) {
+          object : ChipClusters.IntegerAttributeCallback {
+            override fun onSuccess(value: Int) {
               continuation.resume(value)
             }
 

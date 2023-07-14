@@ -116,7 +116,7 @@ class ChipClient(context: Context) {
       val pointerId = getConnectedDevicePointer(deviceId)
       chipDeviceController.readAttributePath(reportCallback,
         pointerId,
-        listOf(attributePath))
+        listOf(attributePath), 0)
 //    }
 
   }
