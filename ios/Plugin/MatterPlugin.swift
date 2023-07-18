@@ -9,10 +9,12 @@ import Capacitor
 public class MatterPlugin: CAPPlugin {
     private let implementation = Matter()
 
-    @objc func echo(_ call: CAPPluginCall) {
+    @objc func startCommissioning(_ call: CAPPluginCall) {
         let value = call.getString("value") ?? ""
         call.resolve([
-            "value": implementation.echo(value)
+            "value": implementation.startCommissioning("data")
         ])
+        
     }
+    
 }

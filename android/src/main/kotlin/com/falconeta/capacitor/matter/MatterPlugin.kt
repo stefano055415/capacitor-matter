@@ -179,15 +179,16 @@ class MatterPlugin : Plugin() {
   @PluginMethod
   fun commandOnOff(call: PluginCall) {
     val deviceStringId = call.getString("deviceId")
+    val endpointId = call.getInt("endpointId")
     val value = call.getBoolean("value")
-    if (deviceStringId == null || value == null) {
-      call.reject("deviceId and value must be exist!")
+    if (deviceStringId == null || value == null || endpointId == null) {
+      call.reject("deviceId and value and endpointId must be exist!")
       return;
     }
 
     try {
       val deviceId = deviceStringId.toLong()
-      implementation.commandOnOff(deviceId, value)
+      implementation.commandOnOff(deviceId, endpointId, value)
       call.resolve()
 //      _call = call;
     } catch (error: NumberFormatException) {

@@ -63,9 +63,9 @@ class MatterInstance(
     commissionDevice();
   }
 
-  fun commandOnOff(deviceId: Long, value: Boolean) {
+  fun commandOnOff(deviceId: Long, endpointId: Int, value: Boolean) {
     this.matterInstanceScope.launch {
-      clustersHelper.setOnOffDeviceStateOnOffCluster(deviceId, value, 1)
+      clustersHelper.setOnOffDeviceStateOnOffCluster(deviceId, value, endpointId)
     }
   }
 
