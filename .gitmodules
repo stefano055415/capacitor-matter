@@ -1,3 +1,0 @@
-[submodule "android/third_party/connectedhomeip/libs"]
-	path = android/third_party/connectedhomeip/libs
-	url = https://github.com/falconeta/matter-android-libs.git

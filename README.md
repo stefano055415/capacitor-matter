@@ -3,6 +3,24 @@
 # WORK IN PROGRESS!
 
 plugin that handle the Matter Application protocol
+## Make SDK from CHIP repo
+by default, plugins use standard Matter SDK (v 1.1.0.1) but if possible to make your custom SDK by connectedhomeip project (https://github.com/project-chip/connectedhomeip)
+
+### Android
+
+1 - see `android_building.md` guide under /docs/guides (`Building Android CHIPTool from scripts` step after preconfiguration)
+2 - compress the content of the folder `examples/android/CHIPTool/app/libs` with `libs.zip` name.
+3 - upload the zip on your google drive
+4 - modify or create your custom `post-install.js` script with file ID and the google key
+
+### IOS
+
+1 - bootstrap project 
+2 - under `src/darwin/Framework` folder launch `xcodebuild -target "Matter" -sdk iphoneos -configuration Release OTHER_CFLAGS='${inherited} -Wno-unguarded-availability-new'`
+2 - compress the folder `src/darwin/Framework/build/Release-iphoneos/Matter.framework` with `Matter.framework.zip` name.
+3 - upload the zip on your google drive
+4 - modify or create your custom `post-install.js` script with file ID and the google key
+
 
 ## Install
 
