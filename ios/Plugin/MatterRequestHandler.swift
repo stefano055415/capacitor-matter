@@ -9,7 +9,7 @@ import MatterSupport
 
 // The extension is launched in response to `MatterAddDeviceRequest.perform()` and this class is the entry point
 // for the extension operations.
-@available(iOS 16.1, *)
+@available(iOS 16.4, *)
 public class MatterRequestHandler {
     public init() {}
     
@@ -34,6 +34,53 @@ public class MatterRequestHandler {
 
     public func commissionDevice(home: MatterAddDeviceRequest.Home?,onboardingPayload: String, commissioningID: UUID) async throws {
         // Use this function to commission the device with your Matter stack.
+        let controller = InitializeMTR()
+        let deviceId = MTRGetLastPairedDeviceId()
+        
+        do{
+            try controller?.pairDevice(deviceId + 1, onboardingPayload: onboardingPayload)
+        } catch {
+            print("matter")
+        }
+        
+//        do{
+//            
+//            let  device = try controller?.deviceBeingCommissioned(withNodeID: 1);
+//        }catch {
+//            print("matter")
+//        }
+//
+//        if (device?.sessionTransportType == MTRTransportType.BLE) {
+//            print("ble")
+////            dispatch_async(dispatch_get_main_queue(), ^{
+////                [self->_deviceList refreshDeviceList];
+////                [self retrieveAndSendWiFiCredentials];
+////            });
+//        }
+//        else {
+//            MTRCommissioningParameters * params = [[MTRCommissioningParameters alloc] init];
+//            params.deviceAttestationDelegate = [[CHIPToolDeviceAttestationDelegate alloc] initWithViewController:self];
+//            params.failSafeExpiryTimeoutSecs = @600;
+//            NSError * error;
+//            if (![controller commissionDevice:deviceId commissioningParams:params error:&error]) {
+//                NSLog(@"Failed to commission Device %llu, with error %@", deviceId, error);
+//            }
+//        }
+        
+        
+        
+        
+        
+        
+        
+//        let params = MTRCommissioningParameters()
+////        params.deviceAttestationDelegate = CHIPToolDeviceAttestationDelegate.initWithViewController();
+//        params.failSafeExpiryTimeoutSecs = 600;
+//       do {
+//           let result = try controller?.commissionNode(withID: 1, commissioningParams: params)
+//       } catch {
+//           print("matter")
+//       }
         print("matter")
     }
 
