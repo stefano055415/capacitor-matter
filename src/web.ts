@@ -10,7 +10,7 @@ export class MatterWeb extends WebPlugin implements MatterPlugin {
   getCerts(): Promise<{ deviceControllerKey: string; caRootCert: string }> {
     throw new Error('Method not implemented.');
   }
-  readAttribute<T>(options: AttributePath): Promise<{ data: T }> {
+  readAttribute(options: AttributePath): Promise<{ value: string }> {
     console.log(options);
     throw new Error('Method not implemented.');
   }

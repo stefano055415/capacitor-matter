@@ -11,6 +11,7 @@ import com.falconeta.capacitor.matter.chip.ChipClient
 import com.falconeta.capacitor.matter.chip.ClustersHelper
 import com.falconeta.capacitor.matter.commissioning.AppCommissioningService
 import com.falconeta.capacitor.matter.preference.Preference
+import com.getcapacitor.PluginCall
 import com.google.android.gms.home.matter.Matter
 import com.google.android.gms.home.matter.commissioning.CommissioningRequest
 import kotlinx.coroutines.CoroutineScope
@@ -69,7 +70,7 @@ class MatterInstance(
     }
   }
 
-  fun readAttribute(deviceId: Long, endpointId: Int, clusterId: Int, attributeId: Int) {
+  fun readAttribute(deviceId: Long, endpointId: Int, clusterId: Int, attributeId: Int, call: PluginCall) {
     if (!configured) {
       throw java.lang.Error("plugin must be configured first...");
     }
@@ -81,14 +82,7 @@ class MatterInstance(
       val attributePath =
         ChipAttributePath.newInstance(chipEndpointId, chipClusterId, chipAttributeId)
 
-      chipClient.readAttribute(deviceId, attributePath);
-
-//      deviceController.readPath(reportCallback,
-//        ChipClient.getConnectedDevicePointer(requireContext(),
-//          addressUpdateFragment.deviceId),
-//        listOf(attributePath),
-//        null,
-//        isFabricFiltered)
+      chipClient.readAttribute(deviceId, attributePath, call);
     }
   }
 

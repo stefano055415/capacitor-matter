@@ -31,7 +31,7 @@ export interface MatterPlugin {
     clusterId: number;
   }): Promise<{ data: T }>;
 
-  readAttribute<T>(options: AttributePath): Promise<{ data: T }>;
+  readAttribute(options: AttributePath): Promise<{ value: string }>;
 
   subscribeAttribute(options: SubscriberOptions): Promise<void>;
 

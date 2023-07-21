@@ -211,9 +211,7 @@ class MatterPlugin : Plugin() {
 
     try {
       val deviceId = deviceStringId.toLong()
-      implementation.readAttribute(deviceId, endpointId, clusterId, attributeId)
-      call.resolve()
-//      _call = call;
+      implementation.readAttribute(deviceId, endpointId, clusterId, attributeId, call)
     } catch (error: NumberFormatException) {
       call.reject("deviceId must be a number and not major of 9223372036854775807")
     }

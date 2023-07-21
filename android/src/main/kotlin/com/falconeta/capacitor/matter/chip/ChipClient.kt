@@ -18,6 +18,8 @@ import chip.platform.PreferencesConfigurationManager
 import chip.platform.PreferencesKeyValueStoreManager
 import com.falconeta.capacitor.matter.preference.Preference
 import com.falconeta.capacitor.matter.stripLinkLocalInIpAddress
+import com.getcapacitor.JSObject
+import com.getcapacitor.PluginCall
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
@@ -28,6 +30,7 @@ class ChipClient(context: Context) {
   private val preference: Preference
   private val vendorId: Int
   private val fabricId: Long
+  private var _call: PluginCall? = null;
 
   init {
     preference = Preference(context)
@@ -51,8 +54,12 @@ class ChipClient(context: Context) {
     override fun onReport(nodeState: NodeState) {
       Log.i(TAG, "Received wildcard report")
       val debugString = nodeStateToDebugString(nodeState)
-      Log.i(TAG, debugString)
-//      requireActivity().runOnUiThread { binding.outputTv.text = debugString }
+      if (_call == null){
+        return;
+      }
+      val data = JSObject()
+      data.put("value", debugString)
+      _call!!.resolve(data)
     }
 
     override fun onDone() {
@@ -63,27 +70,27 @@ class ChipClient(context: Context) {
   private fun nodeStateToDebugString(nodeState: NodeState): String {
     val stringBuilder = StringBuilder()
     nodeState.endpointStates.forEach { (endpointId, endpointState) ->
-      stringBuilder.append("Endpoint $endpointId: {\n")
+      stringBuilder.append("{")
       endpointState.clusterStates.forEach { (clusterId, clusterState) ->
-        stringBuilder.append("\t${ChipIdLookup.clusterIdToName(clusterId)}Cluster: {\n")
+        stringBuilder.append("\"${ChipIdLookup.clusterIdToName(clusterId)}Cluster\": {")
         clusterState.attributeStates.forEach { (attributeId, attributeState) ->
           val attributeName = ChipIdLookup.attributeIdToName(clusterId, attributeId)
-          stringBuilder.append("\t\t$attributeName: ${attributeState.value}\n")
+          stringBuilder.append("\"$attributeName\": \"${attributeState.value}\"")
         }
         clusterState.eventStates.forEach { (eventId, events) ->
           for (event in events)
           {
-            stringBuilder.append("\t\teventNumber: ${event.eventNumber}\n")
-            stringBuilder.append("\t\tpriorityLevel: ${event.priorityLevel}\n")
-            stringBuilder.append("\t\tsystemTimeStamp: ${event.systemTimeStamp}\n")
+            stringBuilder.append("\"eventNumber\": ${event.eventNumber}")
+            stringBuilder.append("\"priorityLevel\": ${event.priorityLevel}")
+            stringBuilder.append("\"systemTimeStamp\": ${event.systemTimeStamp}")
 
             val eventName = ChipIdLookup.eventIdToName(clusterId, eventId)
-            stringBuilder.append("\t\t$eventName: ${event.value}\n")
+            stringBuilder.append("\"$eventName\": \"${event.value}\"")
           }
         }
-        stringBuilder.append("\t}\n")
+        stringBuilder.append("}")
       }
-      stringBuilder.append("}\n")
+      stringBuilder.append("}")
     }
     return stringBuilder.toString()
   }
@@ -111,14 +118,12 @@ class ChipClient(context: Context) {
       controllerParams)
   }
 
-  suspend fun readAttribute(deviceId: Long, attributePath: ChipAttributePath) {
-//    return suspendCoroutine { continuation ->
+  suspend fun readAttribute(deviceId: Long, attributePath: ChipAttributePath, call: PluginCall) {
+      _call = call;
       val pointerId = getConnectedDevicePointer(deviceId)
       chipDeviceController.readAttributePath(reportCallback,
         pointerId,
         listOf(attributePath), 0)
-//    }
-
   }
 
   /**
