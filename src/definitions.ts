@@ -57,3 +57,7 @@ export interface EventOptions {
 export type SubscriberOptions = EventOptions & AttributePath;
 
 export declare type AttributeChangeListener<T> = (data: T) => void;
+
+export enum ErrorStatus {
+  Close = '-1',
+}
