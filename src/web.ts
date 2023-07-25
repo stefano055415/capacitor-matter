@@ -7,6 +7,16 @@ import type {
 } from './definitions';
 
 export class MatterWeb extends WebPlugin implements MatterPlugin {
+  manualCommissioning(options: {
+    deviceId: string;
+    qrCodeId: string;
+    ssid: string;
+    ssidPassword: string;
+  }): Promise<{ deviceType: string }> {
+    console.log(options);
+    throw new Error('Method not implemented.');
+  }
+
   getCerts(): Promise<{ deviceControllerKey: string; caRootCert: string }> {
     throw new Error('Method not implemented.');
   }

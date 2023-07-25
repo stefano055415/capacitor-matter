@@ -20,12 +20,12 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-extern NSString * const MTRToolDefaultsDomain;
+extern NSString * MTRToolDefaultsDomain;
 extern NSString * const kNetworkSSIDDefaultsKey;
 extern NSString * const kNetworkPasswordDefaultsKey;
 extern NSString * const kFabricIdKey;
 
-MTRDeviceController * _Nullable InitializeMTR(void);
+MTRDeviceController * _Nullable InitializeMTR(long fabricId, int vendorId);
 MTRDeviceController * _Nullable MTRRestartController(MTRDeviceController * controller);
 id _Nullable MTRGetDomainValueForKey(NSString * domain, NSString * key);
 BOOL MTRSetDomainValueForKey(NSString * domain, NSString * key, id _Nullable value);

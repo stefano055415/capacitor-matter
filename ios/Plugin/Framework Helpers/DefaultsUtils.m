@@ -18,11 +18,22 @@
 #import "DefaultsUtils.h"
 #import "FabricKeys.h"
 
+NSString * MTRToolDefaultsDomain = @"com.matter.CHIPTool";
 NSString * const kNetworkSSIDDefaultsKey = @"networkSSID";
 NSString * const kNetworkPasswordDefaultsKey = @"networkPassword";
 NSString * const MTRNextAvailableDeviceIDKey = @"nextDeviceID";
 NSString * const kFabricIdKey = @"fabricId";
 NSString * const kDevicePairedKey = @"Paired";
+long _fabricId = 1;
+int _vendorId = 0xFFF1u;
+
+
+MTRDeviceController * controller = nil;
+
+void initialize(void) {
+    if(!MTRToolDefaultsDomain)
+        MTRToolDefaultsDomain = [[NSBundle mainBundle] bundleIdentifier];
+}
 
 id MTRGetDomainValueForKey(NSString * domain, NSString * key)
 {
@@ -48,10 +59,9 @@ void MTRRemoveDomainValueForKey(NSString * domain, NSString * key)
 uint64_t MTRGetNextAvailableDeviceID(void)
 {
     uint64_t nextAvailableDeviceIdentifier = 1;
-    NSString * bundleID = [[NSBundle mainBundle] bundleIdentifier];
-    NSNumber * value = MTRGetDomainValueForKey(bundleID, MTRNextAvailableDeviceIDKey);
+    NSNumber * value = MTRGetDomainValueForKey(MTRToolDefaultsDomain, MTRNextAvailableDeviceIDKey);
     if (!value) {
-        MTRSetDomainValueForKey(bundleID, MTRNextAvailableDeviceIDKey,
+        MTRSetDomainValueForKey(MTRToolDefaultsDomain, MTRNextAvailableDeviceIDKey,
             [NSNumber numberWithUnsignedLongLong:nextAvailableDeviceIdentifier]);
     } else {
         nextAvailableDeviceIdentifier = [value unsignedLongLongValue];
@@ -62,18 +72,18 @@ uint64_t MTRGetNextAvailableDeviceID(void)
 
 void MTRSetNextAvailableDeviceID(uint64_t id)
 {
-    NSString * bundleID = [[NSBundle mainBundle] bundleIdentifier];
-    MTRSetDomainValueForKey(bundleID, MTRNextAvailableDeviceIDKey, [NSNumber numberWithUnsignedLongLong:id]);
+    MTRSetDomainValueForKey(MTRToolDefaultsDomain, MTRNextAvailableDeviceIDKey, [NSNumber numberWithUnsignedLongLong:id]);
 }
 
 static CHIPToolPersistentStorageDelegate * storage = nil;
 
-static uint16_t kTestVendorId = 0xFFF1u;
-
 static MTRDeviceController * sController = nil;
 
-MTRDeviceController * InitializeMTR(void)
+MTRDeviceController * InitializeMTR(long fabricId, int vendorId)
 {
+    _fabricId = fabricId;
+    _vendorId = vendorId;
+    
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         CHIPToolPersistentStorageDelegate * storage = [[CHIPToolPersistentStorageDelegate alloc] init];
@@ -88,8 +98,9 @@ MTRDeviceController * InitializeMTR(void)
             return;
         }
 
-        __auto_type * params = [[MTRDeviceControllerStartupParams alloc] initWithSigningKeypair:keys fabricId:1 ipk:keys.ipk];
-        params.vendorId = @(kTestVendorId);
+        __auto_type * params = [[MTRDeviceControllerStartupParams alloc] initWithSigningKeypair:keys fabricId: _fabricId ipk:keys.ipk];
+        
+        params.vendorId = @(_vendorId);
 
         // We're not sure whether we have a fabric configured already; try as if
         // we did, and if not fall back to creating a new one.
@@ -98,7 +109,7 @@ MTRDeviceController * InitializeMTR(void)
             sController = [factory startControllerOnNewFabric:params];
         }
     });
-
+    controller = sController;
     return sController;
 }
 
@@ -114,7 +125,7 @@ MTRDeviceController * MTRRestartController(MTRDeviceController * controller)
     [controller shutdown];
 
     NSLog(@"Starting up the stack");
-    __auto_type * params = [[MTRDeviceControllerStartupParams alloc] initWithSigningKeypair:keys fabricId:1 ipk:keys.ipk];
+    __auto_type * params = [[MTRDeviceControllerStartupParams alloc] initWithSigningKeypair:keys fabricId:_fabricId ipk:keys.ipk];
 
     sController = [[MTRControllerFactory sharedInstance] startControllerOnExistingFabric:params];
 
@@ -132,7 +143,9 @@ uint64_t MTRGetLastPairedDeviceId(void)
 
 BOOL MTRGetConnectedDevice(MTRDeviceConnectionCallback completionHandler)
 {
-    MTRDeviceController * controller = InitializeMTR();
+    if(controller == nil){
+        return false;
+    }
 
     // Let's use the last device that was paired
     uint64_t deviceId = MTRGetLastPairedDeviceId();
@@ -142,7 +155,9 @@ BOOL MTRGetConnectedDevice(MTRDeviceConnectionCallback completionHandler)
 MTRBaseDevice * MTRGetDeviceBeingCommissioned(void)
 {
     NSError * error;
-    MTRDeviceController * controller = InitializeMTR();
+    if(controller == nil){
+        return false;
+    }
     MTRBaseDevice * device = [controller getDeviceBeingCommissioned:MTRGetLastPairedDeviceId() error:&error];
     if (error) {
         NSLog(@"Error retrieving device being commissioned for deviceId %llu", MTRGetLastPairedDeviceId());
@@ -153,22 +168,22 @@ MTRBaseDevice * MTRGetDeviceBeingCommissioned(void)
 
 BOOL MTRGetConnectedDeviceWithID(uint64_t deviceId, MTRDeviceConnectionCallback completionHandler)
 {
-    MTRDeviceController * controller = InitializeMTR();
+    if(controller == nil){
+        return false;
+    }
 
     return [controller getBaseDevice:deviceId queue:dispatch_get_main_queue() completionHandler:completionHandler];
 }
 
 BOOL MTRIsDevicePaired(uint64_t deviceId)
 {
-    NSString * bundleID = [[NSBundle mainBundle] bundleIdentifier];
-    NSString * PairedString = MTRGetDomainValueForKey(bundleID, KeyForPairedDevice(deviceId));
+    NSString * PairedString = MTRGetDomainValueForKey(MTRToolDefaultsDomain, KeyForPairedDevice(deviceId));
     return [PairedString boolValue];
 }
 
 void MTRSetDevicePaired(uint64_t deviceId, BOOL paired)
 {
-    NSString * bundleID = [[NSBundle mainBundle] bundleIdentifier];
-    MTRSetDomainValueForKey(bundleID, KeyForPairedDevice(deviceId), paired ? @"YES" : @"NO");
+    MTRSetDomainValueForKey(MTRToolDefaultsDomain, KeyForPairedDevice(deviceId), paired ? @"YES" : @"NO");
 }
 
 NSString * KeyForPairedDevice(uint64_t deviceId) { return [NSString stringWithFormat:@"%@%llu", kDevicePairedKey, deviceId]; }
@@ -213,25 +228,22 @@ void MTRUnpairDeviceWithID(uint64_t deviceId)
 
 - (nullable NSData *)storageDataForKey:(NSString *)key
 {
-    NSString * bundleID = [[NSBundle mainBundle] bundleIdentifier];
-    NSData * value = MTRGetDomainValueForKey(bundleID, key);
+    NSData * value = MTRGetDomainValueForKey(MTRToolDefaultsDomain, key);
     NSLog(@"MTRPersistentStorageDelegate Get Value for Key: %@, value %@", key, value);
     return value;
 }
 
 - (BOOL)setStorageData:(NSData *)value forKey:(NSString *)key
 {
-    NSString * bundleID = [[NSBundle mainBundle] bundleIdentifier];
-    return MTRSetDomainValueForKey(bundleID, key, value);
+    return MTRSetDomainValueForKey(MTRToolDefaultsDomain, key, value);
 }
 
 - (BOOL)removeStorageDataForKey:(NSString *)key
 {
-    NSString * bundleID = [[NSBundle mainBundle] bundleIdentifier];
-    if (MTRGetDomainValueForKey(bundleID, key) == nil) {
+    if (MTRGetDomainValueForKey(MTRToolDefaultsDomain, key) == nil) {
         return NO;
     }
-    MTRRemoveDomainValueForKey(bundleID, key);
+    MTRRemoveDomainValueForKey(MTRToolDefaultsDomain, key);
     return YES;
 }
 

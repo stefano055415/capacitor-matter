@@ -12,6 +12,13 @@ export interface MatterPlugin {
     deviceId: string;
   }): Promise<{ deviceType: string }>;
 
+  manualCommissioning(options: {
+    deviceId: string;
+    qrCodeId: string;
+    ssid: string;
+    ssidPassword: string
+  }): Promise<{ deviceType: string }>;
+
   getCerts(): Promise<{ deviceControllerKey: string; caRootCert: string }>;
 
   commandOnOff(options: {

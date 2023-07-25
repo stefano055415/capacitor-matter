@@ -36,6 +36,7 @@ npx cap sync
 * [`configure(...)`](#configure)
 * [`clear()`](#clear)
 * [`startCommissioning(...)`](#startcommissioning)
+* [`manualCommissioning(...)`](#manualcommissioning)
 * [`getCerts()`](#getcerts)
 * [`commandOnOff(...)`](#commandonoff)
 * [`getEndpoint(...)`](#getendpoint)
@@ -82,6 +83,21 @@ startCommissioning(options: { deviceId: string; }) => Promise<{ deviceType: stri
 | Param         | Type                               |
 | ------------- | ---------------------------------- |
 | **`options`** | <code>{ deviceId: string; }</code> |
+
+**Returns:** <code>Promise&lt;{ deviceType: string; }&gt;</code>
+
+--------------------
+
+
+### manualCommissioning(...)
+
+```typescript
+manualCommissioning(options: { deviceId: string; qrCodeId: string; ssid: string; ssidPassword: string; }) => Promise<{ deviceType: string; }>
+```
+
+| Param         | Type                                                                                     |
+| ------------- | ---------------------------------------------------------------------------------------- |
+| **`options`** | <code>{ deviceId: string; qrCodeId: string; ssid: string; ssidPassword: string; }</code> |
 
 **Returns:** <code>Promise&lt;{ deviceType: string; }&gt;</code>
 
