@@ -70,27 +70,27 @@ class ChipClient(context: Context) {
   private fun nodeStateToDebugString(nodeState: NodeState): String {
     val stringBuilder = StringBuilder()
     nodeState.endpointStates.forEach { (endpointId, endpointState) ->
-      stringBuilder.append("{")
+      // stringBuilder.append("{")
       endpointState.clusterStates.forEach { (clusterId, clusterState) ->
-        stringBuilder.append("\"${ChipIdLookup.clusterIdToName(clusterId)}Cluster\": {")
+        // stringBuilder.append("\"${ChipIdLookup.clusterIdToName(clusterId)}Cluster\": {")
         clusterState.attributeStates.forEach { (attributeId, attributeState) ->
-          val attributeName = ChipIdLookup.attributeIdToName(clusterId, attributeId)
-          stringBuilder.append("\"$attributeName\": \"${attributeState.value}\"")
+//          val attributeName = ChipIdLookup.attributeIdToName(clusterId, attributeId)
+          stringBuilder.append("${attributeState.value}")
         }
-        clusterState.eventStates.forEach { (eventId, events) ->
-          for (event in events)
-          {
-            stringBuilder.append("\"eventNumber\": ${event.eventNumber}")
-            stringBuilder.append("\"priorityLevel\": ${event.priorityLevel}")
-            stringBuilder.append("\"systemTimeStamp\": ${event.systemTimeStamp}")
-
-            val eventName = ChipIdLookup.eventIdToName(clusterId, eventId)
-            stringBuilder.append("\"$eventName\": \"${event.value}\"")
-          }
-        }
-        stringBuilder.append("}")
+//        clusterState.eventStates.forEach { (eventId, events) ->
+//          for (event in events)
+//          {
+//            // stringBuilder.append("\"eventNumber\": ${event.eventNumber}")
+//            // stringBuilder.append("\"priorityLevel\": ${event.priorityLevel}")
+//            // stringBuilder.append("\"systemTimeStamp\": ${event.systemTimeStamp}")
+//
+//            // val eventName = ChipIdLookup.eventIdToName(clusterId, eventId)
+//            stringBuilder.append("${event.value}")
+//          }
+//        }
+        // stringBuilder.append("}")
       }
-      stringBuilder.append("}")
+      // stringBuilder.append("}")
     }
     return stringBuilder.toString()
   }

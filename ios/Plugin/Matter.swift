@@ -2,26 +2,6 @@ import Foundation
 import Capacitor
 
 @available(iOS 16.4, *)
-public class CHIPToolDeviceAttestationDelegate {
-    let _viewController: MTRDeviceControllerDelegate;
-    
-    init(viewController: MTRDeviceControllerDelegate) {
-        self._viewController = viewController
-    }
-    
-//    public func initWithViewController(viewController: Matter) -> CHIPToolDeviceAttestationDelegate
-//    {
-////        if (self = [super init]) {
-////            _viewController = viewController;
-////        }
-//        return self;
-//    }
-}
-
-
-
-
-@available(iOS 16.4, *)
 public class Matter: MTRDeviceControllerDelegate  {
     var _fabricId: Int = 1;
     var _vendorId: Int32 = 0xFFF4;
@@ -106,14 +86,7 @@ public class Matter: MTRDeviceControllerDelegate  {
             do{
                 let device: MTRBaseDevice = try controller.deviceBeingCommissioned(withNodeID: _deviceId as NSNumber);
                 if (device.sessionTransportType == MTRTransportType.BLE) {
-//                    DispatchQueue.main.async {
-                        self.commissionWithSSID()
-//                    }
-//                    dispatch_async(dispatch_get_main_queue(), ^{
-//                        [self->_deviceList refreshDeviceList];
-//                        [self retrieveAndSendWiFiCredentials];
-//                        commissionWithSSID()
-//                    });
+                    self.commissionWithSSID()                  
                 } else {
                     let params: MTRCommissioningParameters = MTRCommissioningParameters.init();
 //                    params.deviceAttestationDelegate = CHIPToolDeviceAttestationDelegate.init(viewController: self);
@@ -121,10 +94,6 @@ public class Matter: MTRDeviceControllerDelegate  {
                     params.failSafeExpiryTimeoutSecs = 600;
 
                     try _controller?.commissionDevice(_deviceId, commissioningParams: params)
-
-//                    if (![controller commissionDevice:deviceId commissioningParams:params error:&error]) {
-//                        NSLog(@"Failed to commission Device %llu, with error %@", deviceId, error);
-//                    }
                 }
             } catch{
                 print("Failed to commission Device" + String(_deviceId) + ", with error ")
@@ -169,49 +138,42 @@ public class Matter: MTRDeviceControllerDelegate  {
     @objc public func readAttribute(deviceId: UInt64, endpointId: Int, clusterId: Int, attributeId: Int, call: CAPPluginCall )  -> Void {
         _deviceId = deviceId;
         _call = call;
-        _controller
-        
+        MTRGetConnectedDeviceWithID(deviceId){ chipDevice,error in
+            if(error != nil){
+                call.reject("-2")
+                return;
+            }
+            let serialQueue = DispatchQueue(label: "com.csa.matter.qrcodevc.callback")           
+            let attribute = MTRAttributeRequestPath.init(endpointID: endpointId as NSNumber, clusterID: clusterId as NSNumber, attributeID: attributeId as NSNumber)
+            
+            chipDevice?.readAttributePaths([attribute], eventPaths: nil, params: nil, queue: serialQueue) {result,error in 
+                for (key, values) in result![0] {
+                    if let myDictionary = values as? [String : String] {
+                        if(myDictionary["value"] != nil) {
+                            call.resolve(["value": myDictionary["value"]!])
+                        }
+                    }
+                }
+            }
+        }
     }
     
     
     private func handleRendezVous(deviceId: UInt64, setupPayload: MTRSetupPayload, rawPayload: String)
     {
         if (setupPayload.rendezvousInformation == nil) {
-//            NSLog(@"Rendezvous Default");
             handleRendezVousDefault(deviceId: deviceId, payload: rawPayload)
-//            [self handleRendezVousDefault:rawPayload];
             return;
         }
-        let capabilities = setupPayload.discoveryCapabilities
-        switch(setupPayload.discoveryCapabilities){
-            
-//        case MTRDiscoveryCapabilities.onNetwork,
-//         MTRDiscoveryCapabilities.BLE,
-//         MTRDiscoveryCapabilities.allMask:
-//            print("Rendezvous Default");
-//            break;
-        case MTRDiscoveryCapabilities.softAP:
-            print("Rendezvous Wi-Fi");
-            break;
-        default:
-            print("Rendezvous Default");
-            handleRendezVousDefault(deviceId: deviceId, payload: rawPayload)
-        }
 
-//        // TODO: This is a pretty broken way to handle a bitmask.
-//        switch ([payload.rendezvousInformation unsignedLongValue]) {
-//        case MTRDiscoveryCapabilitiesNone:
-//        case MTRDiscoveryCapabilitiesOnNetwork:
-//        case MTRDiscoveryCapabilitiesBLE:
-//        case MTRDiscoveryCapabilitiesAllMask:
-//            NSLog(@"Rendezvous Default");
-//            [self handleRendezVousDefault:rawPayload];
-//            break;
-//        case MTRDiscoveryCapabilitiesSoftAP:
-//            NSLog(@"Rendezvous Wi-Fi");
-//            [self handleRendezVousWiFi:[self getNetworkName:payload.discriminator]];
-//            break;
-//        }
+        switch(setupPayload.discoveryCapabilities) {
+            case MTRDiscoveryCapabilities.softAP:
+                print("Rendezvous Wi-Fi");
+                break;
+            default:
+                print("Rendezvous Default");
+                handleRendezVousDefault(deviceId: deviceId, payload: rawPayload)
+        }
     }
     
     private func handleRendezVousDefault(deviceId: UInt64, payload: String)
@@ -219,13 +181,9 @@ public class Matter: MTRDeviceControllerDelegate  {
         let deviceID = MTRGetNextAvailableDeviceID();
 
         restartMatterStack()
-        do{
+        do {
             let result = try _controller!.pairDevice(deviceId, onboardingPayload: payload)
-//            if (result) {
-//                deviceID++;
-//                MTRSetNextAvailableDeviceID(deviceID);
-//            }
-        } catch{
+        } catch {
             
         }
         
@@ -235,8 +193,8 @@ public class Matter: MTRDeviceControllerDelegate  {
     private func restartMatterStack ()
     {
         _controller = MTRRestartController(_controller!);
-        let concurrentQueue = DispatchQueue(label: "com.csa.matter.qrcodevc.callback")
-        _controller!.setDeviceControllerDelegate(self, queue: concurrentQueue)
+        let serialQueue = DispatchQueue(label: "com.csa.matter.qrcodevc.callback")
+        _controller!.setDeviceControllerDelegate(self, queue: serialQueue)
     }
     
     private func commissionWithSSID()
@@ -249,13 +207,10 @@ public class Matter: MTRDeviceControllerDelegate  {
              let params = MTRCommissioningParameters.init();
              params.wifiSSID = _ssid.data(using: .utf8)
              params.wifiCredentials = _ssidPassword.data(using: .utf8)
-     //        params.deviceAttestationDelegate = [[CHIPToolDeviceAttestationDelegate alloc] initWithViewController:self];
              params.failSafeExpiryTimeoutSecs = 600;
-
-     //        uint64_t deviceId = MTRGetNextAvailableDeviceID() - 1;
-             do{
+             do {
                  try _controller?.commissionDevice(_deviceId, commissioningParams: params)
-             }catch{
+             } catch {
                  print("Failed to commission Device" + String(_deviceId) + ", with error ")
              }
         }
