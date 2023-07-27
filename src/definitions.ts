@@ -67,4 +67,11 @@ export declare type AttributeChangeListener<T> = (data: T) => void;
 
 export enum ErrorStatus {
   Close = '-1',
+  GenericError = '-2',
+  RendezVousError = '-3',
+  StartCommissioningError = '-4',
+  ParsePayloadError = '-5',
+  GetDeviceConnectedError = '-6',
+  PairDeviceError = '-7',
+  CommissioningEndError = '-8'
 }
