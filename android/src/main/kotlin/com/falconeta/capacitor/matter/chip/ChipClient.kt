@@ -1,5 +1,6 @@
 package com.falconeta.capacitor.matter.chip
 
+import android.bluetooth.BluetoothGatt
 import android.content.Context
 import android.util.Log
 import androidx.core.content.ContentProviderCompat.requireContext
@@ -31,12 +32,23 @@ class ChipClient(context: Context) {
   private val vendorId: Int
   private val fabricId: Long
   private var _call: PluginCall? = null;
+  private lateinit var androidPlatform: AndroidChipPlatform
 
   init {
     preference = Preference(context)
     val (vid, fid) = preference.getVendorIdAndFabricId()
     vendorId = vid;
     fabricId = fid;
+  }
+
+  fun getAndroidChipPlatform(context: Context?): AndroidChipPlatform {
+    if (!this::androidPlatform.isInitialized && context != null) {
+      //force ChipDeviceController load jni
+//      ChipDeviceController.loadJni()
+      androidPlatform = AndroidChipPlatform(AndroidBleManager(), PreferencesKeyValueStoreManager(context), PreferencesConfigurationManager(context), NsdManagerServiceResolver(context), NsdManagerServiceBrowser(context), ChipMdnsCallbackImpl(), DiagnosticDataProviderImpl(context))
+    }
+
+    return androidPlatform
   }
 
   private val reportCallback = object : ReportCallback {
@@ -157,6 +169,22 @@ class ChipClient(context: Context) {
     Log.d(TAG,
       "computePaseVerifier: devicePtr [${devicePtr}] pinCode [${pinCode}] iterations [${iterations}] salt [${salt}]")
     return chipDeviceController.computePaseVerifier(devicePtr, pinCode, iterations, salt)
+  }
+
+  fun setDeviceAttestationDelegate(failsafeTimeout: Int, deviceAttestationDelegate: DeviceAttestationDelegate){
+    return chipDeviceController.setDeviceAttestationDelegate(failsafeTimeout,  deviceAttestationDelegate)
+  }
+
+  fun continueCommissioning(devicePtr: Long, ignoreAttestationFailure: Boolean){
+    return chipDeviceController.continueCommissioning(devicePtr, ignoreAttestationFailure)
+  }
+
+  fun pairDevice(bleServer: BluetoothGatt?, connId: Int, deviceId: Long, setupPincode: Long, networkCredentials: NetworkCredentials){
+    return chipDeviceController.pairDevice(bleServer, connId, deviceId, setupPincode, networkCredentials)
+  }
+
+  fun setCompletionListener(listener: ChipDeviceController.CompletionListener){
+    return chipDeviceController.setCompletionListener(listener)
   }
 
   suspend fun awaitEstablishPaseConnection(

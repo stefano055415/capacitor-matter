@@ -1,5 +1,6 @@
 package com.falconeta.capacitor.matter
 
+import android.Manifest
 import android.app.Activity
 import android.content.ContentValues
 import android.util.Log
@@ -11,11 +12,24 @@ import com.getcapacitor.annotation.CapacitorPlugin
 import com.getcapacitor.PluginMethod
 import com.getcapacitor.PluginCall
 import com.getcapacitor.JSObject
+import com.getcapacitor.PermissionState
 import com.getcapacitor.Plugin
+import com.getcapacitor.annotation.Permission
+import com.getcapacitor.annotation.PermissionCallback
 import com.google.android.gms.home.matter.commissioning.CommissioningResult
 import org.xml.sax.ErrorHandler
 
-@CapacitorPlugin(name = "Matter")
+
+private const val PERMISSION_BLUETOOTH_CONNECT = "BLUETOOTH_CONNECT";
+
+@CapacitorPlugin(
+  name = "Matter",
+  permissions = [
+    Permission(
+      alias = PERMISSION_BLUETOOTH_CONNECT,
+      strings = [Manifest.permission.BLUETOOTH_CONNECT]
+    )
+])
 class MatterPlugin : Plugin() {
 
   private lateinit var implementation: MatterInstance;
@@ -87,6 +101,42 @@ class MatterPlugin : Plugin() {
   }
 
   @PluginMethod
+  fun manualCommissioning(call: PluginCall) {
+    if(!isPermissionGranted()){
+      checkPermission(call, "manualCommissioningCallback");
+    }
+    val deviceStringId = call.getString("deviceId")
+    val qrCodeId = call.getString("qrCodeId")
+    val ssid = call.getString("ssid")
+    val ssidPassword = call.getString("ssidPassword")
+
+    if (qrCodeId == null || deviceStringId == null || ssid == null || ssidPassword == null) {
+      call.reject("params must be exist!")
+      return;
+    }
+
+    try {
+      val deviceId = deviceStringId.toLong()
+      implementation.manualCommissioning(deviceId, qrCodeId, ssid, ssidPassword, call)
+
+    } catch (error: NumberFormatException) {
+      call.reject("deviceId must be a number and not major of 9223372036854775807")
+    }
+
+  }
+
+  @PermissionCallback
+  private fun manualCommissioningCallback(call: PluginCall) {
+    if (isPermissionGranted()) {
+      manualCommissioning(call);
+    } else {
+      val ret = JSObject()
+      ret.put("value", -999);
+      call.resolve(ret)
+    }
+  }
+
+  @PluginMethod
   fun commandOnOff(call: PluginCall) {
     val deviceStringId = call.getString("deviceId")
     val endpointId = call.getInt("endpointId")
@@ -126,5 +176,19 @@ class MatterPlugin : Plugin() {
       call.reject("deviceId must be a number and not major of 9223372036854775807")
     }
 
+  }
+
+  private fun isPermissionGranted(): Boolean {
+    return getPermissionState(PERMISSION_BLUETOOTH_CONNECT) == PermissionState.GRANTED
+  }
+
+  private fun checkPermission(call: PluginCall, callbackName: String) {
+    if (getPermissionState(PERMISSION_BLUETOOTH_CONNECT) != PermissionState.GRANTED) {
+      return requestPermissionForAlias(
+        PERMISSION_BLUETOOTH_CONNECT,
+        call,
+        callbackName
+      );
+    }
   }
 }
