@@ -196,11 +196,7 @@ public class Matter: MTRDeviceControllerDelegate  {
         call.resolve()
     }
     
-    @objc public func startCommissioning(call: CAPPluginCall )  -> Void {
-        
-    }
-    
-    @objc public func manualCommissioning(qrCodeId: String, deviceId: UInt64, ssid: String, ssidPassword: String, call: CAPPluginCall )  -> Void {
+    @objc public func qrCodeCommissioning(qrCodeId: String, deviceId: UInt64, ssid: String, ssidPassword: String, call: CAPPluginCall )  -> Void {
         
         let parser = MTRQRCodeSetupPayloadParser.init(base38Representation: qrCodeId)
         do{
@@ -209,7 +205,22 @@ public class Matter: MTRDeviceControllerDelegate  {
             _ssid = ssid;
             _ssidPassword = ssidPassword
             _call = call;
-            handleRendezVous(deviceId: deviceId, setupPayload: _setupPayload!, rawPayload: qrCodeId)
+            handleRendezVous(deviceId: deviceId, setupPayload: _setupPayload!)
+        } catch {
+            call.reject("-5")
+        }
+    }
+    
+    @objc public func manualCodeCommissioning(manualCode: String, deviceId: UInt64, ssid: String, ssidPassword: String, call: CAPPluginCall )  -> Void {
+        
+        let parser = MTRManualSetupPayloadParser.init(decimalStringRepresentation: manualCode)
+        do{
+            _setupPayload = try parser.populatePayload()
+            _deviceId = deviceId;
+            _ssid = ssid;
+            _ssidPassword = ssidPassword
+            _call = call;
+            handleRendezVous(deviceId: deviceId, setupPayload: _setupPayload!)
         } catch {
             call.reject("-5")
         }
@@ -239,10 +250,10 @@ public class Matter: MTRDeviceControllerDelegate  {
     }
     
     
-    private func handleRendezVous(deviceId: UInt64, setupPayload: MTRSetupPayload, rawPayload: String)
+    private func handleRendezVous(deviceId: UInt64, setupPayload: MTRSetupPayload)
     {
         if (setupPayload.rendezvousInformation == nil) {
-            handleRendezVousDefault(deviceId: deviceId, payload: rawPayload)
+            handleRendezVousDefault(deviceId: deviceId, setupPayload: setupPayload)
             return;
         }
 
@@ -252,15 +263,14 @@ public class Matter: MTRDeviceControllerDelegate  {
                 break;
             default:
                 print("Rendezvous Default");
-                handleRendezVousDefault(deviceId: deviceId, payload: rawPayload)
+                handleRendezVousDefault(deviceId: deviceId, setupPayload: setupPayload)
         }
     }
     
-    private func handleRendezVousDefault(deviceId: UInt64, payload: String)
+    private func handleRendezVousDefault(deviceId: UInt64, setupPayload: MTRSetupPayload)
     {
         restartMatterStack()
         do {
-            let setupPayload = try MTRSetupPayload.init(onboardingPayload: payload)
             try _controller?.setupCommissioningSession(with: setupPayload, newNodeID: deviceId as NSNumber)
         } catch {
             _call?.reject("-7")

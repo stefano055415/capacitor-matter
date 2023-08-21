@@ -51,7 +51,7 @@ public class MatterPlugin: CAPPlugin {
     }
 
 
-    @objc func manualCommissioning(_ call: CAPPluginCall) {
+    @objc func qrCodeCommissioning(_ call: CAPPluginCall) {
         let qrCodeId = call.getString("qrCodeId")
         let deviceId = call.getString("deviceId")
         let ssid = call.getString("ssid")
@@ -62,11 +62,21 @@ public class MatterPlugin: CAPPlugin {
           return;
         }
         
-        implementation.manualCommissioning(qrCodeId: qrCodeId!, deviceId: UInt64(deviceId!) ?? 1, ssid: ssid!, ssidPassword: ssidPassword!, call: call)
+        implementation.qrCodeCommissioning(qrCodeId: qrCodeId!, deviceId: UInt64(deviceId!) ?? 1, ssid: ssid!, ssidPassword: ssidPassword!, call: call)
     }
 
-    @objc func startCommissioning(_ call: CAPPluginCall) {
-        implementation.startCommissioning(call: call)
+    @objc func manualCodeCommissioning(_ call: CAPPluginCall) {
+        let manualCode = call.getString("manualCode")
+        let deviceId = call.getString("deviceId")
+        let ssid = call.getString("ssid")
+        let ssidPassword = call.getString("ssidPassword")
+        
+        if (manualCode == nil || deviceId == nil || ssid == nil || ssidPassword == nil) {
+          call.reject("params must be exist!")
+          return;
+        }
+        
+        implementation.manualCodeCommissioning(manualCode: manualCode!, deviceId: UInt64(deviceId!) ?? 1, ssid: ssid!, ssidPassword: ssidPassword!, call: call)
         
     }
     

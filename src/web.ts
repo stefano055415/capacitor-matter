@@ -7,9 +7,19 @@ import type {
 } from './definitions';
 
 export class MatterWeb extends WebPlugin implements MatterPlugin {
-  manualCommissioning(options: {
+  qrCodeCommissioning(options: {
     deviceId: string;
     qrCodeId: string;
+    ssid: string;
+    ssidPassword: string;
+  }): Promise<{ deviceType: string }> {
+    console.log(options);
+    throw new Error('Method not implemented.');
+  }
+
+  manualCodeCommissioning(options: {
+    deviceId: string;
+    manualCode: string;
     ssid: string;
     ssidPassword: string;
   }): Promise<{ deviceType: string }> {
@@ -40,12 +50,6 @@ export class MatterWeb extends WebPlugin implements MatterPlugin {
     throw new Error('Method not implemented.');
   }
   clear(): Promise<void> {
-    throw new Error('Method not implemented.');
-  }
-  startCommissioning(options: {
-    deviceId: string;
-  }): Promise<{ deviceType: string }> {
-    console.log(options);
     throw new Error('Method not implemented.');
   }
   commandOnOff(options: {

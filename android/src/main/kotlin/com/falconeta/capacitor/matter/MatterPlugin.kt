@@ -83,16 +83,23 @@ class MatterPlugin : Plugin() {
 
 
   @PluginMethod
-  fun startCommissioning(call: PluginCall) {
+  fun manualCodeCommissioning(call: PluginCall) {
+    if(!isPermissionGranted()){
+      checkPermission(call, "manualCodeCommissioningCallback");
+    }
     val deviceStringId = call.getString("deviceId")
-    if (deviceStringId == null) {
-      call.reject("deviceId must be exist!")
+    val manualCode = call.getString("manualCode")
+    val ssid = call.getString("ssid")
+    val ssidPassword = call.getString("ssidPassword")
+
+    if (manualCode == null || deviceStringId == null || ssid == null || ssidPassword == null) {
+      call.reject("params must be exist!")
       return;
     }
 
     try {
       val deviceId = deviceStringId.toLong()
-      implementation.startCommissioning(deviceId, call)
+      implementation.manualCodeCommissioning(deviceId, manualCode, ssid, ssidPassword, call)
 
     } catch (error: NumberFormatException) {
       call.reject("deviceId must be a number and not major of 9223372036854775807")
@@ -100,10 +107,21 @@ class MatterPlugin : Plugin() {
 
   }
 
+  @PermissionCallback
+  private fun manualCodeCommissioningCallback(call: PluginCall) {
+    if (isPermissionGranted()) {
+      manualCodeCommissioning(call);
+    } else {
+      val ret = JSObject()
+      ret.put("value", -999);
+      call.resolve(ret)
+    }
+  }
+
   @PluginMethod
-  fun manualCommissioning(call: PluginCall) {
+  fun qrCodeCommissioning(call: PluginCall) {
     if(!isPermissionGranted()){
-      checkPermission(call, "manualCommissioningCallback");
+      checkPermission(call, "qrCodeCommissioningCallback");
     }
     val deviceStringId = call.getString("deviceId")
     val qrCodeId = call.getString("qrCodeId")
@@ -117,7 +135,7 @@ class MatterPlugin : Plugin() {
 
     try {
       val deviceId = deviceStringId.toLong()
-      implementation.manualCommissioning(deviceId, qrCodeId, ssid, ssidPassword, call)
+      implementation.qrCodeCommissioning(deviceId, qrCodeId, ssid, ssidPassword, call)
 
     } catch (error: NumberFormatException) {
       call.reject("deviceId must be a number and not major of 9223372036854775807")
@@ -126,9 +144,9 @@ class MatterPlugin : Plugin() {
   }
 
   @PermissionCallback
-  private fun manualCommissioningCallback(call: PluginCall) {
+  private fun qrCodeCommissioningCallback(call: PluginCall) {
     if (isPermissionGranted()) {
-      manualCommissioning(call);
+      qrCodeCommissioning(call);
     } else {
       val ret = JSObject()
       ret.put("value", -999);

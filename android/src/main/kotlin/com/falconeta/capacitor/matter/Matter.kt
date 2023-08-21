@@ -101,18 +101,20 @@ class MatterInstance(
     return preference.getCerts()
   }
 
-  fun startCommissioning(deviceId: Long, call: PluginCall) {
+  fun manualCodeCommissioning(deviceId: Long, manualCode: String, ssid: String, ssidPassword: String, call: PluginCall) {
     preference.setDeviceIdForCommissioning(deviceId);
-    commissionDevice(call);
+    // commissionDevice(call);
+    handleInputQrCodeOrManualCode(deviceId, manualCode, ssid, ssidPassword)
   }
 
-  fun manualCommissioning(deviceId: Long, qrCode: String, ssid: String, ssidPassword: String, call: PluginCall) {
+
+  fun qrCodeCommissioning(deviceId: Long, qrCode: String, ssid: String, ssidPassword: String, call: PluginCall) {
     preference.setDeviceIdForCommissioning(deviceId);
     _call = call;
-    handleInputQrCode(deviceId, qrCode, ssid, ssidPassword)
+    handleInputQrCodeOrManualCode(deviceId, qrCode, ssid, ssidPassword)
   }
 
-  private fun handleInputQrCode(deviceId: Long, qrCode: String, ssid: String, ssidPassword: String) {
+  private fun handleInputQrCodeOrManualCode(deviceId: Long, qrCode: String, ssid: String, ssidPassword: String) {
     lateinit var payload: SetupPayload
     var isShortDiscriminator = false
     try {

@@ -35,8 +35,8 @@ npx cap sync
 
 * [`configure(...)`](#configure)
 * [`clear()`](#clear)
-* [`startCommissioning(...)`](#startcommissioning)
-* [`manualCommissioning(...)`](#manualcommissioning)
+* [`qrCodeCommissioning(...)`](#qrcodecommissioning)
+* [`manualCodeCommissioning(...)`](#manualcodecommissioning)
 * [`getCerts()`](#getcerts)
 * [`commandOnOff(...)`](#commandonoff)
 * [`getEndpoint(...)`](#getendpoint)
@@ -74,30 +74,30 @@ clear() => Promise<void>
 --------------------
 
 
-### startCommissioning(...)
+### qrCodeCommissioning(...)
 
 ```typescript
-startCommissioning(options: { deviceId: string; }) => Promise<{ deviceType: string; }>
+qrCodeCommissioning(options: { deviceId: string; qrCodeId: string; ssid: string; ssidPassword: string; }) => Promise<{ deviceType: string; }>
 ```
 
-| Param         | Type                               |
-| ------------- | ---------------------------------- |
-| **`options`** | <code>{ deviceId: string; }</code> |
+| Param         | Type                                                                                     |
+| ------------- | ---------------------------------------------------------------------------------------- |
+| **`options`** | <code>{ deviceId: string; qrCodeId: string; ssid: string; ssidPassword: string; }</code> |
 
 **Returns:** <code>Promise&lt;{ deviceType: string; }&gt;</code>
 
 --------------------
 
 
-### manualCommissioning(...)
+### manualCodeCommissioning(...)
 
 ```typescript
-manualCommissioning(options: { deviceId: string; qrCodeId: string; ssid: string; ssidPassword: string; }) => Promise<{ deviceType: string; }>
+manualCodeCommissioning(options: { deviceId: string; manualCode: string; ssid: string; ssidPassword: string; }) => Promise<{ deviceType: string; }>
 ```
 
-| Param         | Type                                                                                     |
-| ------------- | ---------------------------------------------------------------------------------------- |
-| **`options`** | <code>{ deviceId: string; qrCodeId: string; ssid: string; ssidPassword: string; }</code> |
+| Param         | Type                                                                                       |
+| ------------- | ------------------------------------------------------------------------------------------ |
+| **`options`** | <code>{ deviceId: string; manualCode: string; ssid: string; ssidPassword: string; }</code> |
 
 **Returns:** <code>Promise&lt;{ deviceType: string; }&gt;</code>
 

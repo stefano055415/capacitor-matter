@@ -8,13 +8,17 @@ export interface MatterPlugin {
     vendorId: number;
   }): Promise<void>;
   clear(): Promise<void>;
-  startCommissioning(options: {
-    deviceId: string;
-  }): Promise<{ deviceType: string }>;
-
-  manualCommissioning(options: {
+  
+  qrCodeCommissioning(options: {
     deviceId: string;
     qrCodeId: string;
+    ssid: string;
+    ssidPassword: string
+  }): Promise<{ deviceType: string }>;
+
+  manualCodeCommissioning(options: {
+    deviceId: string;
+    manualCode: string;
     ssid: string;
     ssidPassword: string
   }): Promise<{ deviceType: string }>;
