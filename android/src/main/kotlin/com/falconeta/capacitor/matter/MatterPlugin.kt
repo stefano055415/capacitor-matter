@@ -1,23 +1,17 @@
 package com.falconeta.capacitor.matter
 
 import android.Manifest
-import android.app.Activity
-import android.content.ContentValues
-import android.util.Log
-import androidx.activity.result.ActivityResult
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.IntentSenderRequest
-import androidx.activity.result.contract.ActivityResultContracts
-import com.getcapacitor.annotation.CapacitorPlugin
-import com.getcapacitor.PluginMethod
-import com.getcapacitor.PluginCall
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothManager
+import android.content.Context
 import com.getcapacitor.JSObject
 import com.getcapacitor.PermissionState
 import com.getcapacitor.Plugin
+import com.getcapacitor.PluginCall
+import com.getcapacitor.PluginMethod
+import com.getcapacitor.annotation.CapacitorPlugin
 import com.getcapacitor.annotation.Permission
 import com.getcapacitor.annotation.PermissionCallback
-import com.google.android.gms.home.matter.commissioning.CommissioningResult
-import org.xml.sax.ErrorHandler
 
 
 private const val PERMISSION_BLUETOOTH_CONNECT = "BLUETOOTH_CONNECT";
@@ -103,6 +97,13 @@ class MatterPlugin : Plugin() {
     if(!isPermissionGranted()){
       return checkPermission(call, "manualCodeCommissioningCallback");
     }
+
+    val bluetoothManager = context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+    if (!bluetoothManager.adapter.isEnabled){
+      call?.reject("-9");
+      return;
+    }
+    
     val deviceStringId = call.getString("deviceId")
     val manualCode = call.getString("manualCode")
     val ssid = call.getString("ssid")
@@ -139,6 +140,14 @@ class MatterPlugin : Plugin() {
     if(!isPermissionGranted()){
       return checkPermission(call, "qrCodeCommissioningCallback");
     }
+
+
+    val bluetoothManager = context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+    if (!bluetoothManager.adapter.isEnabled){
+      call?.reject("-9");
+      return;
+    }
+
     val deviceStringId = call.getString("deviceId")
     val qrCodeId = call.getString("qrCodeId")
     val ssid = call.getString("ssid")

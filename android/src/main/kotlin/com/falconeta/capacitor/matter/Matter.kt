@@ -104,32 +104,37 @@ class MatterInstance(
   fun manualCodeCommissioning(deviceId: Long, manualCode: String, ssid: String, ssidPassword: String, call: PluginCall) {
     preference.setDeviceIdForCommissioning(deviceId);
     _call = call;
-    handleInputQrCodeOrManualCode(deviceId, manualCode, ssid, ssidPassword)
+    handleInputQrCodeOrManualCode(deviceId, null, manualCode, ssid, ssidPassword)
   }
 
 
   fun qrCodeCommissioning(deviceId: Long, qrCode: String, ssid: String, ssidPassword: String, call: PluginCall) {
     preference.setDeviceIdForCommissioning(deviceId);
     _call = call;
-    handleInputQrCodeOrManualCode(deviceId, qrCode, ssid, ssidPassword)
+    handleInputQrCodeOrManualCode(deviceId, qrCode, null, ssid, ssidPassword)
   }
 
-  private fun handleInputQrCodeOrManualCode(deviceId: Long, qrCode: String, ssid: String, ssidPassword: String) {
+  private fun handleInputQrCodeOrManualCode(deviceId: Long, qrCode: String?, manualCode: String?, ssid: String, ssidPassword: String) {
     lateinit var payload: SetupPayload
-    var isShortDiscriminator = false
-    try {
-      payload = SetupPayloadParser().parseQrCode(qrCode)
-    } catch (ex: SetupPayloadParser.SetupPayloadException) {
+    var isShortDiscriminator = qrCode == null
+
+    if (qrCode != null) {
       try {
-        payload = SetupPayloadParser().parseManualEntryCode(qrCode)
-        isShortDiscriminator = true
-      } catch (ex: Exception) {
+        payload = SetupPayloadParser().parseQrCode(qrCode)
+      }  catch (ex: Exception) {
         showError("-5")
-        Log.e("TAG", "Unrecognized Manual Pairing Code", ex)
+        Log.e("TAG", "Unrecognized QR Code", ex)
+        return;
       }
-    } catch (ex: SetupPayloadParser.UnrecognizedQrCodeException) {
-      showError("-5")
-      Log.e("TAG", "Unrecognized QR Code", ex)
+    }
+    else {
+      try {
+        payload = SetupPayloadParser().parseManualEntryCode(manualCode)
+      } catch (ex: Exception) {
+        showError("-10")
+        Log.e("TAG", "Unrecognized Manual Pairing Code", ex)
+        return;
+      }
     }
 
     val deviceInfo = CHIPDeviceInfo.fromSetupPayload(payload, isShortDiscriminator)

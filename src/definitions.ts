@@ -74,8 +74,10 @@ export enum ErrorStatus {
   GenericError = '-2',
   RendezVousError = '-3',
   StartCommissioningError = '-4',
-  ParsePayloadError = '-5',
+  ParseQrCodeError = '-5',
   GetDeviceConnectedError = '-6',
   PairDeviceError = '-7',
-  CommissioningEndError = '-8'
+  CommissioningEndError = '-8',
+  BluetoothDisabled = '-9',
+  ParseManualCodeError = '-10',
 }

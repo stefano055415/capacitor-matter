@@ -219,7 +219,7 @@ public class Matter: MTRDeviceControllerDelegate  {
             _call = call;
             handleRendezVous(deviceId: deviceId, setupPayload: _setupPayload!)
         } catch {
-            call.reject("-5")
+            call.reject("-10")
         }
     }
     
