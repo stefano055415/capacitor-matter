@@ -103,7 +103,7 @@ class MatterInstance(
 
   fun manualCodeCommissioning(deviceId: Long, manualCode: String, ssid: String, ssidPassword: String, call: PluginCall) {
     preference.setDeviceIdForCommissioning(deviceId);
-    // commissionDevice(call);
+    _call = call;
     handleInputQrCodeOrManualCode(deviceId, manualCode, ssid, ssidPassword)
   }
 
@@ -152,7 +152,7 @@ class MatterInstance(
       val bluetoothManager = BluetoothManager()
 
       val device = bluetoothManager.getBluetoothDevice(context, deviceInfo.discriminator, deviceInfo.isShortDiscriminator) ?: run {
-        showError("-3") // TODO fix
+        showError("-3")
         return@launch
       }
 
@@ -190,7 +190,8 @@ class MatterInstance(
         })
 
         return@setDeviceAttestationDelegate
-      } else{
+      } else {
+        chipClient.close()
         showError("-7")
       }
 
@@ -292,6 +293,7 @@ class MatterInstance(
     }
 
     override fun onCommissioningComplete(nodeId: Long, errorCode: Int) {
+      chipClient.close()
       if (errorCode == STATUS_PAIRING_SUCCESS) {
         _call?.resolve()
         _call = null;
@@ -302,7 +304,7 @@ class MatterInstance(
 
     override fun onPairingComplete(code: Int) {
       Log.d(TAG, "onPairingComplete: $code")
-
+      chipClient.close()
       if (code != STATUS_PAIRING_SUCCESS) {
         showError("-7")
       }

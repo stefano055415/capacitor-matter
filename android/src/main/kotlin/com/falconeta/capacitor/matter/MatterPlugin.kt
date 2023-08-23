@@ -21,14 +21,30 @@ import org.xml.sax.ErrorHandler
 
 
 private const val PERMISSION_BLUETOOTH_CONNECT = "BLUETOOTH_CONNECT";
+private const val PERMISSION_BLUETOOTH_SCAN = "BLUETOOTH_SCAN";
+private const val PERMISSION_BLUETOOTH = "BLUETOOTH";
+private const val PERMISSION_ACCESS_FINE_LOCATION = "ACCESS_FINE_LOCATION";
 
 @CapacitorPlugin(
   name = "Matter",
   permissions = [
     Permission(
+      alias = PERMISSION_BLUETOOTH,
+      strings = [Manifest.permission.BLUETOOTH]
+    ),
+    Permission(
+      alias = PERMISSION_ACCESS_FINE_LOCATION,
+      strings = [Manifest.permission.ACCESS_FINE_LOCATION]
+    ),
+    Permission(
       alias = PERMISSION_BLUETOOTH_CONNECT,
       strings = [Manifest.permission.BLUETOOTH_CONNECT]
+    ),
+    Permission(
+      alias = PERMISSION_BLUETOOTH_SCAN,
+      strings = [Manifest.permission.BLUETOOTH_SCAN]
     )
+
 ])
 class MatterPlugin : Plugin() {
 
@@ -85,7 +101,7 @@ class MatterPlugin : Plugin() {
   @PluginMethod
   fun manualCodeCommissioning(call: PluginCall) {
     if(!isPermissionGranted()){
-      checkPermission(call, "manualCodeCommissioningCallback");
+      return checkPermission(call, "manualCodeCommissioningCallback");
     }
     val deviceStringId = call.getString("deviceId")
     val manualCode = call.getString("manualCode")
@@ -121,7 +137,7 @@ class MatterPlugin : Plugin() {
   @PluginMethod
   fun qrCodeCommissioning(call: PluginCall) {
     if(!isPermissionGranted()){
-      checkPermission(call, "qrCodeCommissioningCallback");
+      return checkPermission(call, "qrCodeCommissioningCallback");
     }
     val deviceStringId = call.getString("deviceId")
     val qrCodeId = call.getString("qrCodeId")
@@ -197,13 +213,50 @@ class MatterPlugin : Plugin() {
   }
 
   private fun isPermissionGranted(): Boolean {
-    return getPermissionState(PERMISSION_BLUETOOTH_CONNECT) == PermissionState.GRANTED
+    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+      return getPermissionState(PERMISSION_BLUETOOTH_CONNECT) == PermissionState.GRANTED &&
+        getPermissionState(PERMISSION_BLUETOOTH_SCAN) == PermissionState.GRANTED
+    }
+
+    return getPermissionState(PERMISSION_BLUETOOTH) == PermissionState.GRANTED &&
+      getPermissionState(PERMISSION_ACCESS_FINE_LOCATION) == PermissionState.GRANTED
   }
 
   private fun checkPermission(call: PluginCall, callbackName: String) {
-    if (getPermissionState(PERMISSION_BLUETOOTH_CONNECT) != PermissionState.GRANTED) {
+
+    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+      if (getPermissionState(PERMISSION_BLUETOOTH_CONNECT) != PermissionState.GRANTED
+      ) {
+        return requestPermissionForAlias(
+          PERMISSION_BLUETOOTH_CONNECT,
+          call,
+          callbackName
+        );
+      }
+
+      if (getPermissionState(PERMISSION_BLUETOOTH_SCAN) != PermissionState.GRANTED
+      ) {
+        return requestPermissionForAlias(
+          PERMISSION_BLUETOOTH_SCAN,
+          call,
+          callbackName
+        );
+      }
+    }
+
+    if (getPermissionState(PERMISSION_BLUETOOTH) != PermissionState.GRANTED
+    ) {
       return requestPermissionForAlias(
-        PERMISSION_BLUETOOTH_CONNECT,
+        PERMISSION_BLUETOOTH,
+        call,
+        callbackName
+      );
+    }
+
+    if (getPermissionState(PERMISSION_ACCESS_FINE_LOCATION) != PermissionState.GRANTED
+    ) {
+      return requestPermissionForAlias(
+        PERMISSION_ACCESS_FINE_LOCATION,
         call,
         callbackName
       );

@@ -44,7 +44,7 @@ class ChipClient(context: Context) {
   fun getAndroidChipPlatform(context: Context?): AndroidChipPlatform {
     if (!this::androidPlatform.isInitialized && context != null) {
       //force ChipDeviceController load jni
-//      ChipDeviceController.loadJni()
+      ChipDeviceController.loadJni()
       androidPlatform = AndroidChipPlatform(AndroidBleManager(), PreferencesKeyValueStoreManager(context), PreferencesConfigurationManager(context), NsdManagerServiceResolver(context), NsdManagerServiceBrowser(context), ChipMdnsCallbackImpl(), DiagnosticDataProviderImpl(context))
     }
 
@@ -116,19 +116,14 @@ class ChipClient(context: Context) {
     .build();
 
   // Lazily instantiate [ChipDeviceController] and hold a reference to it.
+
   private val chipDeviceController: ChipDeviceController by lazy {
     ChipDeviceController.loadJni()
-    AndroidChipPlatform(
-      AndroidBleManager(),
-      PreferencesKeyValueStoreManager(context),
-      PreferencesConfigurationManager(context),
-      NsdManagerServiceResolver(context),
-      NsdManagerServiceBrowser(context),
-      ChipMdnsCallbackImpl(),
-      DiagnosticDataProviderImpl(context))
     ChipDeviceController(
       controllerParams)
   }
+
+  // private val chipDeviceController = ChipDeviceController(ControllerParams.newBuilder().setControllerVendorId(vendorId).setFabricId(fabricId).build())
 
   suspend fun readAttribute(deviceId: Long, attributePath: ChipAttributePath, call: PluginCall) {
       _call = call;
@@ -181,6 +176,10 @@ class ChipClient(context: Context) {
 
   fun pairDevice(bleServer: BluetoothGatt?, connId: Int, deviceId: Long, setupPincode: Long, networkCredentials: NetworkCredentials){
     return chipDeviceController.pairDevice(bleServer, connId, deviceId, setupPincode, networkCredentials)
+  }
+
+  fun close() {
+    return chipDeviceController.close()
   }
 
   fun setCompletionListener(listener: ChipDeviceController.CompletionListener){

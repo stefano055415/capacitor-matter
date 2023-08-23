@@ -129,9 +129,6 @@ public class Matter: MTRDeviceControllerDelegate  {
         }
     }
     
-    public func controller(_ controller: MTRDeviceController, readCommissioningInfo info: MTRProductIdentity) {
-        return;
-    }
     
     public func controller(_ controller: MTRDeviceController, commissioningComplete error: Error?, nodeID: NSNumber?) {
         if(error != nil){
@@ -235,9 +232,10 @@ public class Matter: MTRDeviceControllerDelegate  {
                 return;
             }
             let serialQueue = DispatchQueue(label: "com.csa.matter.qrcodevc.callback")           
-            let attribute = MTRAttributeRequestPath.init(endpointID: endpointId as NSNumber, clusterID: clusterId as NSNumber, attributeID: attributeId as NSNumber)
+            let attribute =  MTRAttributePath.init(endpointID: endpointId as NSNumber, clusterID: clusterId as NSNumber, attributeID: attributeId as NSNumber)
             
-            chipDevice?.readAttributePaths([attribute], eventPaths: nil, params: nil, queue: serialQueue) {result,error in 
+            chipDevice?.readAttributes(withEndpointID: endpointId as NSNumber, clusterID: clusterId as NSNumber, attributeID:attributeId as NSNumber, params: nil, queue: serialQueue)
+            {result,error in
                 for (_, values) in result![0] {
                     if let myDictionary = values as? [String : String] {
                         if(myDictionary["value"] != nil) {
