@@ -247,6 +247,35 @@ public class Matter: MTRDeviceControllerDelegate  {
         }
     }
     
+    @objc public func openCommissioningWindow(deviceId: UInt64, discriminator: Int, duration: Int, call: CAPPluginCall )  -> Void {
+            MTRGetConnectedDeviceWithID(deviceId) {chipDevice, error in
+                if(chipDevice == nil){
+                    call.reject("-11")
+                    return
+                }
+                
+                let setupPIN = MTRSetupPayload.generateRandomPIN();
+                let serialQueue = DispatchQueue(label: "com.csa.matter.opencommissioningwindowvc.callback")
+                
+                chipDevice!.openCommissioningWindow(withSetupPasscode: setupPIN as NSNumber, discriminator: discriminator as NSNumber, duration: duration as NSNumber, queue: serialQueue) {payload,error in
+                    if(payload == nil){
+                        call.reject("-12")
+                        return;
+                    }
+                    call.resolve(["manualCode": payload!.manualEntryCode() ?? ""])
+                }
+            }
+    }
+    
+    @objc public func removeFabric(deviceId: UInt64, fabricId: Int, call: CAPPluginCall )  -> Void {
+        
+        
+    }
+    
+    @objc public func removeAllFabric(deviceId: UInt64, call: CAPPluginCall )  -> Void {
+        
+        
+    }
     
     private func handleRendezVous(deviceId: UInt64, setupPayload: MTRSetupPayload)
     {

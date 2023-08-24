@@ -221,6 +221,63 @@ class MatterPlugin : Plugin() {
 
   }
 
+  @PluginMethod
+  fun removeFabric(call: PluginCall) {
+    val deviceStringId = call.getString("deviceId")
+    val fabricId = call.getInt("fabricId")
+
+    if (deviceStringId == null || fabricId == null) {
+      call.reject("params must be exist!")
+      return;
+    }
+
+    try {
+      val deviceId = deviceStringId.toLong()
+      // implementation.readAttribute(deviceId, endpointId, clusterId, attributeId, call)
+    } catch (error: NumberFormatException) {
+      call.reject("deviceId must be a number and not major of 9223372036854775807")
+    }
+
+  }
+
+  @PluginMethod
+  fun removeAllFabric(call: PluginCall) {
+    val deviceStringId = call.getString("deviceId")
+
+    if (deviceStringId == null) {
+      call.reject("params must be exist!")
+      return;
+    }
+
+    try {
+      val deviceId = deviceStringId.toLong()
+      // implementation.readAttribute(deviceId, endpointId, clusterId, attributeId, call)
+    } catch (error: NumberFormatException) {
+      call.reject("deviceId must be a number and not major of 9223372036854775807")
+    }
+
+  }
+
+  @PluginMethod
+  fun openCommissioningWindow(call: PluginCall) {
+    val deviceStringId = call.getString("deviceId")
+    val discriminator = call.getInt("discriminator")
+    val duration = call.getInt("duration")
+
+    if (deviceStringId == null) {
+      call.reject("params must be exist!")
+      return;
+    }
+
+    try {
+      val deviceId = deviceStringId.toLong()
+      // implementation.readAttribute(deviceId, endpointId, clusterId, attributeId, call)
+    } catch (error: NumberFormatException) {
+      call.reject("deviceId must be a number and not major of 9223372036854775807")
+    }
+
+  }
+
   private fun isPermissionGranted(): Boolean {
     if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
       return getPermissionState(PERMISSION_BLUETOOTH_CONNECT) == PermissionState.GRANTED &&

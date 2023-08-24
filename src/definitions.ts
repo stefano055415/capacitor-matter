@@ -8,19 +8,19 @@ export interface MatterPlugin {
     vendorId: number;
   }): Promise<void>;
   clear(): Promise<void>;
-  
+
   qrCodeCommissioning(options: {
     deviceId: string;
     qrCodeId: string;
     ssid: string;
-    ssidPassword: string
+    ssidPassword: string;
   }): Promise<{ deviceType: string }>;
 
   manualCodeCommissioning(options: {
     deviceId: string;
     manualCode: string;
     ssid: string;
-    ssidPassword: string
+    ssidPassword: string;
   }): Promise<{ deviceType: string }>;
 
   getCerts(): Promise<{ deviceControllerKey: string; caRootCert: string }>;
@@ -45,6 +45,16 @@ export interface MatterPlugin {
   readAttribute(options: AttributePath): Promise<{ value: string }>;
 
   subscribeAttribute(options: SubscriberOptions): Promise<void>;
+
+  openCommissioningWindow(options: {
+    deviceId: string;
+    discriminator: number;
+    duration: number;
+  }): Promise<{ manualCode: string }>;
+
+  removeFabric(options: { deviceId: string; fabricId: string }): Promise<void>;
+
+  removeAllFabric(options: { deviceId: string }): Promise<void>;
 
   addListener<T>(
     eventName: string,
@@ -80,4 +90,6 @@ export enum ErrorStatus {
   CommissioningEndError = '-8',
   BluetoothDisabled = '-9',
   ParseManualCodeError = '-10',
+  getDeviceError = '-11',
+  openCommissioningWindowError = '-12',
 }

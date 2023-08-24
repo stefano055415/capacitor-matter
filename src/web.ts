@@ -7,6 +7,25 @@ import type {
 } from './definitions';
 
 export class MatterWeb extends WebPlugin implements MatterPlugin {
+  removeFabric(options: { deviceId: string; fabricId: string }): Promise<void> {
+    console.log(options);
+    throw new Error('Method not implemented.');
+  }
+
+  removeAllFabric(options: { deviceId: string }): Promise<void> {
+    console.log(options);
+    throw new Error('Method not implemented.');
+  }
+
+  openCommissioningWindow(options: {
+    deviceId: string;
+    discriminator: number;
+    duration: number;
+  }): Promise<{ manualCode: string }> {
+    console.log(options);
+    throw new Error('Method not implemented.');
+  }
+
   qrCodeCommissioning(options: {
     deviceId: string;
     qrCodeId: string;

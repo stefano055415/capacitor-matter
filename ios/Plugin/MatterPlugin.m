@@ -8,4 +8,7 @@ CAP_PLUGIN(MatterPlugin, "Matter",
            CAP_PLUGIN_METHOD(qrCodeCommissioning, CAPPluginReturnPromise);
            CAP_PLUGIN_METHOD(manualCodeCommissioning, CAPPluginReturnPromise);
            CAP_PLUGIN_METHOD(readAttribute, CAPPluginReturnPromise);
+           CAP_PLUGIN_METHOD(removeFabric, CAPPluginReturnPromise);
+           CAP_PLUGIN_METHOD(removeAllFabric, CAPPluginReturnPromise);
+           CAP_PLUGIN_METHOD(openCommissioningWindow, CAPPluginReturnPromise);
 )

@@ -79,5 +79,43 @@ public class MatterPlugin: CAPPlugin {
         implementation.manualCodeCommissioning(manualCode: manualCode!, deviceId: UInt64(deviceId!) ?? 1, ssid: ssid!, ssidPassword: ssidPassword!, call: call)
         
     }
+
+    @objc func openCommissioningWindow(_ call: CAPPluginCall) {
+        let deviceId = call.getString("deviceId")
+        let discriminator = call.getInt("discriminator")
+        let duration = call.getInt("duration")
+        
+        if (deviceId == nil || discriminator == nil || duration == nil) {
+          call.reject("params must be exist!")
+          return;
+        }
+        
+        implementation.openCommissioningWindow(deviceId: UInt64(deviceId!) ?? 1, discriminator: discriminator!, duration: duration!, call: call)
+    }
+
+    @objc func removeFabric(_ call: CAPPluginCall) {
+        let deviceId = call.getString("deviceId")
+        let fabricStringId = call.getString("fabricId")
+        
+        if (deviceId == nil || fabricStringId == nil) {
+          call.reject("params must be exist!")
+          return;
+        }
+        
+        let fabricId =  Int(fabricStringId!)
+        
+        implementation.removeFabric(deviceId: UInt64(deviceId!) ?? 1, fabricId: fabricId!, call: call)
+    }
+
+    @objc func removeAllFabric(_ call: CAPPluginCall) {
+        let deviceId = call.getString("deviceId")
+        
+        if (deviceId == nil) {
+          call.reject("params must be exist!")
+          return;
+        }
+        
+        implementation.removeAllFabric(deviceId: UInt64(deviceId!) ?? 1, call: call)
+    }
     
 }

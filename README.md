@@ -43,6 +43,9 @@ npx cap sync
 * [`getCluster(...)`](#getcluster)
 * [`readAttribute(...)`](#readattribute)
 * [`subscribeAttribute(...)`](#subscribeattribute)
+* [`openCommissioningWindow(...)`](#opencommissioningwindow)
+* [`removeFabric(...)`](#removefabric)
+* [`removeAllFabric(...)`](#removeallfabric)
 * [`addListener(string, ...)`](#addlistenerstring)
 * [Interfaces](#interfaces)
 * [Type Aliases](#type-aliases)
@@ -182,6 +185,47 @@ subscribeAttribute(options: SubscriberOptions) => Promise<void>
 | Param         | Type                                                            |
 | ------------- | --------------------------------------------------------------- |
 | **`options`** | <code><a href="#subscriberoptions">SubscriberOptions</a></code> |
+
+--------------------
+
+
+### openCommissioningWindow(...)
+
+```typescript
+openCommissioningWindow(options: { deviceId: string; discriminator: number; duration: number; }) => Promise<{ manualCode: string; }>
+```
+
+| Param         | Type                                                                        |
+| ------------- | --------------------------------------------------------------------------- |
+| **`options`** | <code>{ deviceId: string; discriminator: number; duration: number; }</code> |
+
+**Returns:** <code>Promise&lt;{ manualCode: string; }&gt;</code>
+
+--------------------
+
+
+### removeFabric(...)
+
+```typescript
+removeFabric(options: { deviceId: string; fabricId: string; }) => Promise<void>
+```
+
+| Param         | Type                                                 |
+| ------------- | ---------------------------------------------------- |
+| **`options`** | <code>{ deviceId: string; fabricId: string; }</code> |
+
+--------------------
+
+
+### removeAllFabric(...)
+
+```typescript
+removeAllFabric(options: { deviceId: string; }) => Promise<void>
+```
+
+| Param         | Type                               |
+| ------------- | ---------------------------------- |
+| **`options`** | <code>{ deviceId: string; }</code> |
 
 --------------------
 
