@@ -192,12 +192,12 @@ subscribeAttribute(options: SubscriberOptions) => Promise<void>
 ### openCommissioningWindow(...)
 
 ```typescript
-openCommissioningWindow(options: { deviceId: string; discriminator: number; duration: number; }) => Promise<{ manualCode: string; }>
+openCommissioningWindow(options: { deviceId: string; discriminator: number; duration: number; setupPIN: number; }) => Promise<{ manualCode: string; }>
 ```
 
-| Param         | Type                                                                        |
-| ------------- | --------------------------------------------------------------------------- |
-| **`options`** | <code>{ deviceId: string; discriminator: number; duration: number; }</code> |
+| Param         | Type                                                                                          |
+| ------------- | --------------------------------------------------------------------------------------------- |
+| **`options`** | <code>{ deviceId: string; discriminator: number; duration: number; setupPIN: number; }</code> |
 
 **Returns:** <code>Promise&lt;{ manualCode: string; }&gt;</code>
 

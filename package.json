@@ -1,6 +1,6 @@
 {
   "name": "@falconeta/capacitor-plugin-matter",
-  "version": "0.0.79",
+  "version": "0.0.81",
   "description": "plugin that handle the Matter Application protocol",
   "main": "dist/plugin.cjs.js",
   "module": "dist/esm/index.js",

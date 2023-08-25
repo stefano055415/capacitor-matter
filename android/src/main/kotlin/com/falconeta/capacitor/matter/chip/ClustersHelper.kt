@@ -36,7 +36,7 @@ data class DeviceMatterInfo(
 )
 
 /** Singleton to facilitate access to Clusters functionality. */
-class ClustersHelper(context: Context) {
+class ClustersHelper(context: Context, chipClient: ChipClient) {
   private val chipClient: ChipClient
 
 
@@ -44,7 +44,7 @@ class ClustersHelper(context: Context) {
 
 
   init {
-    chipClient = ChipClient(context)
+    this.chipClient = chipClient;
   }
 
   // -----------------------------------------------------------------------------------------------

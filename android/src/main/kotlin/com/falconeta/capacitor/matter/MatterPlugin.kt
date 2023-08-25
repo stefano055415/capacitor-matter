@@ -103,7 +103,7 @@ class MatterPlugin : Plugin() {
       call?.reject("-9");
       return;
     }
-    
+
     val deviceStringId = call.getString("deviceId")
     val manualCode = call.getString("manualCode")
     val ssid = call.getString("ssid")
@@ -263,15 +263,16 @@ class MatterPlugin : Plugin() {
     val deviceStringId = call.getString("deviceId")
     val discriminator = call.getInt("discriminator")
     val duration = call.getInt("duration")
+    val setupPIN = call.getInt("setupPIN")
 
-    if (deviceStringId == null) {
+    if (deviceStringId == null || discriminator == null || duration == null || setupPIN == null) {
       call.reject("params must be exist!")
       return;
     }
 
     try {
       val deviceId = deviceStringId.toLong()
-      // implementation.readAttribute(deviceId, endpointId, clusterId, attributeId, call)
+      implementation.openCommissioningWindow(deviceId, discriminator, duration, setupPIN, call)
     } catch (error: NumberFormatException) {
       call.reject("deviceId must be a number and not major of 9223372036854775807")
     }

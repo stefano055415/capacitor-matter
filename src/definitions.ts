@@ -7,6 +7,7 @@ export interface MatterPlugin {
     fabricId: string;
     vendorId: number;
   }): Promise<void>;
+  
   clear(): Promise<void>;
 
   qrCodeCommissioning(options: {
@@ -46,10 +47,16 @@ export interface MatterPlugin {
 
   subscribeAttribute(options: SubscriberOptions): Promise<void>;
 
+  /**
+   * 
+   * @param options 
+   * @param setupPIN 8 digit random pin  
+   */
   openCommissioningWindow(options: {
     deviceId: string;
     discriminator: number;
     duration: number;
+    setupPIN: number;
   }): Promise<{ manualCode: string }>;
 
   removeFabric(options: { deviceId: string; fabricId: string }): Promise<void>;

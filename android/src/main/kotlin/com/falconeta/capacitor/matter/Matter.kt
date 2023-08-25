@@ -14,6 +14,7 @@ import chip.devicecontroller.ChipDeviceController
 import chip.devicecontroller.NetworkCredentials
 import chip.devicecontroller.model.ChipAttributePath
 import chip.devicecontroller.model.ChipPathId
+import chip.setuppayload.DiscoveryCapability
 import chip.setuppayload.SetupPayload
 import chip.setuppayload.SetupPayloadParser
 import com.falconeta.capacitor.matter.chip.ChipClient
@@ -72,8 +73,10 @@ class MatterInstance(
 
   private val matterInstanceJob = Job()
   private val matterInstancePairingJob = Job()
+  private val matterInstanceOpenCommissioningJob = Job()
   private val matterInstanceScope = CoroutineScope(Dispatchers.Main + matterInstanceJob)
   private val matterPairingScope = CoroutineScope(Dispatchers.Main + matterInstancePairingJob)
+  private val matterInstanceOpenCommissioningScope = CoroutineScope(Dispatchers.Main + matterInstanceOpenCommissioningJob)
 
   private var configured = false;
 
@@ -88,8 +91,8 @@ class MatterInstance(
       "deviceControllerKey $deviceControllerKey, caRootCert $caRootCert, fabricId $fabricId, vendorId: $vendorId, "
     )
     preference.setConfiguration(deviceControllerKey, caRootCert, fabricId, vendorId);
-    clustersHelper = ClustersHelper(context);
     chipClient = ChipClient(context);
+    clustersHelper = ClustersHelper(context, chipClient);
     configured = true;
   }
 
@@ -112,6 +115,12 @@ class MatterInstance(
     preference.setDeviceIdForCommissioning(deviceId);
     _call = call;
     handleInputQrCodeOrManualCode(deviceId, qrCode, null, ssid, ssidPassword)
+  }
+
+  fun openCommissioningWindow(deviceId: Long, discriminator: Int, duration: Int, setupPIN: Int, call: PluginCall){
+    this.matterInstanceOpenCommissioningScope.launch {
+      chipClient.openCommissioningWindow(deviceId, discriminator, duration, setupPIN, call)
+    }
   }
 
   private fun handleInputQrCodeOrManualCode(deviceId: Long, qrCode: String?, manualCode: String?, ssid: String, ssidPassword: String) {
@@ -139,7 +148,13 @@ class MatterInstance(
 
     val deviceInfo = CHIPDeviceInfo.fromSetupPayload(payload, isShortDiscriminator)
     Log.i("TAG", deviceInfo.setupPinCode.toString())
-    startConnectingToDevice(deviceId, deviceInfo, ssid, ssidPassword )
+
+    if(deviceInfo.discoveryCapabilities.contains(DiscoveryCapability.BLE)){
+      startConnectingToDevice(deviceId, deviceInfo, ssid, ssidPassword )
+    } else {
+      pairingDeviceWithIp(deviceId, deviceInfo)
+    }
+
   }
 
   private fun showError(error: String) {
@@ -148,6 +163,21 @@ class MatterInstance(
       _call = null
     }
   }
+
+  private fun pairingDeviceWithIp(deviceId: Long, deviceInfo: CHIPDeviceInfo,){
+    chipClient.discoverCommissionableNodes()
+    matterPairingScope.launch {
+      delay(7000)
+      chipClient.setCompletionListener(ConnectionCallback())
+      chipClient.pairDeviceWithIpAddress(deviceId, deviceInfo.discriminator, deviceInfo.setupPinCode) // TODO: WORK IN PROGRESS
+//      chipClient.awaitCommissionDevice(deviceId, null)
+//      if (_call != null) {
+//        _call!!.resolve()
+//        _call = null;
+//      }
+    }
+  }
+
   private fun startConnectingToDevice(deviceId: Long, deviceInfo: CHIPDeviceInfo, ssid: String, ssidPassword: String) {
 //    if (gatt != null) {
 //      return
