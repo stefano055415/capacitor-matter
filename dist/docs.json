@@ -1,0 +1,365 @@
+{
+  "api": {
+    "name": "MatterPlugin",
+    "slug": "matterplugin",
+    "docs": "",
+    "tags": [],
+    "methods": [
+      {
+        "name": "configure",
+        "signature": "(options: { deviceControllerKey?: string; caRootCert?: string; fabricId: string; vendorId: number; }) => Promise<void>",
+        "parameters": [
+          {
+            "name": "options",
+            "docs": "",
+            "type": "{ deviceControllerKey?: string | undefined; caRootCert?: string | undefined; fabricId: string; vendorId: number; }"
+          }
+        ],
+        "returns": "Promise<void>",
+        "tags": [],
+        "docs": "",
+        "complexTypes": [],
+        "slug": "configure"
+      },
+      {
+        "name": "clear",
+        "signature": "() => Promise<void>",
+        "parameters": [],
+        "returns": "Promise<void>",
+        "tags": [],
+        "docs": "",
+        "complexTypes": [],
+        "slug": "clear"
+      },
+      {
+        "name": "qrCodeCommissioning",
+        "signature": "(options: { deviceId: string; qrCodeId: string; ssid: string; ssidPassword: string; }) => Promise<{ deviceType: string; }>",
+        "parameters": [
+          {
+            "name": "options",
+            "docs": "",
+            "type": "{ deviceId: string; qrCodeId: string; ssid: string; ssidPassword: string; }"
+          }
+        ],
+        "returns": "Promise<{ deviceType: string; }>",
+        "tags": [],
+        "docs": "",
+        "complexTypes": [],
+        "slug": "qrcodecommissioning"
+      },
+      {
+        "name": "manualCodeCommissioning",
+        "signature": "(options: { deviceId: string; manualCode: string; ssid: string; ssidPassword: string; }) => Promise<{ deviceType: string; }>",
+        "parameters": [
+          {
+            "name": "options",
+            "docs": "",
+            "type": "{ deviceId: string; manualCode: string; ssid: string; ssidPassword: string; }"
+          }
+        ],
+        "returns": "Promise<{ deviceType: string; }>",
+        "tags": [],
+        "docs": "",
+        "complexTypes": [],
+        "slug": "manualcodecommissioning"
+      },
+      {
+        "name": "getCerts",
+        "signature": "() => Promise<{ deviceControllerKey: string; caRootCert: string; }>",
+        "parameters": [],
+        "returns": "Promise<{ deviceControllerKey: string; caRootCert: string; }>",
+        "tags": [],
+        "docs": "",
+        "complexTypes": [],
+        "slug": "getcerts"
+      },
+      {
+        "name": "commandOnOff",
+        "signature": "(options: { deviceId: string; value: boolean; endpointId: number; }) => Promise<void>",
+        "parameters": [
+          {
+            "name": "options",
+            "docs": "",
+            "type": "{ deviceId: string; value: boolean; endpointId: number; }"
+          }
+        ],
+        "returns": "Promise<void>",
+        "tags": [],
+        "docs": "",
+        "complexTypes": [],
+        "slug": "commandonoff"
+      },
+      {
+        "name": "getEndpoint",
+        "signature": "<T>(options: { deviceId: string; endpointId: number; }) => Promise<{ data: T; }>",
+        "parameters": [
+          {
+            "name": "options",
+            "docs": "",
+            "type": "{ deviceId: string; endpointId: number; }"
+          }
+        ],
+        "returns": "Promise<{ data: T; }>",
+        "tags": [],
+        "docs": "",
+        "complexTypes": [
+          "T"
+        ],
+        "slug": "getendpoint"
+      },
+      {
+        "name": "getCluster",
+        "signature": "<T>(options: { deviceId: string; endpointId: number; clusterId: number; }) => Promise<{ data: T; }>",
+        "parameters": [
+          {
+            "name": "options",
+            "docs": "",
+            "type": "{ deviceId: string; endpointId: number; clusterId: number; }"
+          }
+        ],
+        "returns": "Promise<{ data: T; }>",
+        "tags": [],
+        "docs": "",
+        "complexTypes": [
+          "T"
+        ],
+        "slug": "getcluster"
+      },
+      {
+        "name": "readAttribute",
+        "signature": "(options: AttributePath) => Promise<{ value: string; }>",
+        "parameters": [
+          {
+            "name": "options",
+            "docs": "",
+            "type": "AttributePath"
+          }
+        ],
+        "returns": "Promise<{ value: string; }>",
+        "tags": [],
+        "docs": "",
+        "complexTypes": [
+          "AttributePath"
+        ],
+        "slug": "readattribute"
+      },
+      {
+        "name": "subscribeAttribute",
+        "signature": "(options: SubscriberOptions) => Promise<void>",
+        "parameters": [
+          {
+            "name": "options",
+            "docs": "",
+            "type": "SubscriberOptions"
+          }
+        ],
+        "returns": "Promise<void>",
+        "tags": [],
+        "docs": "",
+        "complexTypes": [
+          "SubscriberOptions"
+        ],
+        "slug": "subscribeattribute"
+      },
+      {
+        "name": "openCommissioningWindow",
+        "signature": "(options: { deviceId: string; discriminator: number; duration: number; setupPIN: number; }) => Promise<{ manualCode: string; }>",
+        "parameters": [
+          {
+            "name": "options",
+            "docs": "",
+            "type": "{ deviceId: string; discriminator: number; duration: number; setupPIN: number; }"
+          }
+        ],
+        "returns": "Promise<{ manualCode: string; }>",
+        "tags": [
+          {
+            "name": "param",
+            "text": "options"
+          },
+          {
+            "name": "param",
+            "text": "setupPIN 8 digit random pin"
+          }
+        ],
+        "docs": "",
+        "complexTypes": [],
+        "slug": "opencommissioningwindow"
+      },
+      {
+        "name": "removeFabric",
+        "signature": "(options: { deviceId: string; fabricId: string; }) => Promise<void>",
+        "parameters": [
+          {
+            "name": "options",
+            "docs": "",
+            "type": "{ deviceId: string; fabricId: string; }"
+          }
+        ],
+        "returns": "Promise<void>",
+        "tags": [],
+        "docs": "",
+        "complexTypes": [],
+        "slug": "removefabric"
+      },
+      {
+        "name": "removeAllFabric",
+        "signature": "(options: { deviceId: string; }) => Promise<void>",
+        "parameters": [
+          {
+            "name": "options",
+            "docs": "",
+            "type": "{ deviceId: string; }"
+          }
+        ],
+        "returns": "Promise<void>",
+        "tags": [],
+        "docs": "",
+        "complexTypes": [],
+        "slug": "removeallfabric"
+      },
+      {
+        "name": "addListener",
+        "signature": "<T>(eventName: string, listenerFunc: AttributeChangeListener<T>) => Promise<PluginListenerHandle> & PluginListenerHandle",
+        "parameters": [
+          {
+            "name": "eventName",
+            "docs": "",
+            "type": "string"
+          },
+          {
+            "name": "listenerFunc",
+            "docs": "",
+            "type": "AttributeChangeListener<T>"
+          }
+        ],
+        "returns": "Promise<PluginListenerHandle> & PluginListenerHandle",
+        "tags": [],
+        "docs": "",
+        "complexTypes": [
+          "PluginListenerHandle",
+          "AttributeChangeListener",
+          "T"
+        ],
+        "slug": "addlistenerstring"
+      }
+    ],
+    "properties": []
+  },
+  "interfaces": [
+    {
+      "name": "AttributePath",
+      "slug": "attributepath",
+      "docs": "",
+      "tags": [],
+      "methods": [],
+      "properties": [
+        {
+          "name": "deviceId",
+          "tags": [],
+          "docs": "",
+          "complexTypes": [],
+          "type": "string"
+        },
+        {
+          "name": "endpointId",
+          "tags": [],
+          "docs": "",
+          "complexTypes": [],
+          "type": "number"
+        },
+        {
+          "name": "clusterId",
+          "tags": [],
+          "docs": "",
+          "complexTypes": [],
+          "type": "number"
+        },
+        {
+          "name": "attributeId",
+          "tags": [],
+          "docs": "",
+          "complexTypes": [],
+          "type": "number"
+        }
+      ]
+    },
+    {
+      "name": "EventOptions",
+      "slug": "eventoptions",
+      "docs": "",
+      "tags": [],
+      "methods": [],
+      "properties": [
+        {
+          "name": "eventName",
+          "tags": [],
+          "docs": "",
+          "complexTypes": [],
+          "type": "string"
+        },
+        {
+          "name": "min",
+          "tags": [],
+          "docs": "",
+          "complexTypes": [],
+          "type": "number"
+        },
+        {
+          "name": "max",
+          "tags": [],
+          "docs": "",
+          "complexTypes": [],
+          "type": "number"
+        }
+      ]
+    },
+    {
+      "name": "PluginListenerHandle",
+      "slug": "pluginlistenerhandle",
+      "docs": "",
+      "tags": [],
+      "methods": [],
+      "properties": [
+        {
+          "name": "remove",
+          "tags": [],
+          "docs": "",
+          "complexTypes": [],
+          "type": "() => Promise<void>"
+        }
+      ]
+    }
+  ],
+  "enums": [],
+  "typeAliases": [
+    {
+      "name": "SubscriberOptions",
+      "slug": "subscriberoptions",
+      "docs": "",
+      "types": [
+        {
+          "text": "EventOptions & AttributePath",
+          "complexTypes": [
+            "EventOptions",
+            "AttributePath"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "AttributeChangeListener",
+      "slug": "attributechangelistener",
+      "docs": "",
+      "types": [
+        {
+          "text": "(data: T): void",
+          "complexTypes": [
+            "T"
+          ]
+        }
+      ]
+    }
+  ],
+  "pluginConfigs": []
+}
