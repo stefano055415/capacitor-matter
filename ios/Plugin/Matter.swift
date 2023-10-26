@@ -151,6 +151,13 @@ public class Matter: MTRDeviceControllerDelegate  {
         _call = nil
         return;
     }
+
+    @available(iOS 17.0, *)
+    public func controller(_ controller: MTRDeviceController, readCommissioningInfo info: MTRProductIdentity) {
+        _call?.resolve()
+        _call = nil
+        return;
+    }
     
     public func controller(_ controller: MTRDeviceController, commissioningSessionEstablishmentDone error: Error?) {
         if (error != nil) {
@@ -224,8 +231,6 @@ public class Matter: MTRDeviceControllerDelegate  {
     }
     
     @objc public func readAttribute(deviceId: UInt64, endpointId: Int, clusterId: Int, attributeId: Int, call: CAPPluginCall )  -> Void {
-        _deviceId = deviceId;
-        _call = call;
         MTRGetConnectedDeviceWithID(deviceId){ chipDevice,error in
             if(error != nil){
                 call.reject("-6")

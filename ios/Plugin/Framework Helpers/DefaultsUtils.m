@@ -171,7 +171,7 @@ BOOL MTRGetConnectedDeviceWithID(uint64_t deviceId, MTRDeviceConnectionCallback 
     if(controller == nil){
         return false;
     }
-
+    
     return [controller getBaseDevice:deviceId queue:dispatch_get_main_queue() completionHandler:completionHandler];
 }
 
